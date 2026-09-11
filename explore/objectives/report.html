@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reporte de objetivos t0 y t1</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --panel: #151c31;
+      --panel-2: #1c2540;
+      --text: #edf2ff;
+      --muted: #aab6d3;
+      --line: #2e3a5d;
+      --blue: #66a3ff;
+      --cyan: #54d6c7;
+      --warning: #ffca69;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top right, #18274b 0, var(--bg) 38%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    main { width: min(1180px, calc(100% - 32px)); margin: 40px auto 80px; }
+    h1 { margin: 0 0 8px; font-size: clamp(1.8rem, 4vw, 3rem); }
+    h2 { margin: 0 0 16px; font-size: 1.35rem; }
+    h3 { margin: 24px 0 10px; font-size: 1rem; color: var(--cyan); }
+    p { margin: 8px 0; }
+    .subtitle, .muted { color: var(--muted); }
+    .status, .panel, .card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--panel) 94%, transparent);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, .18);
+    }
+    .status { padding: 18px; margin-top: 24px; color: var(--warning); }
+    .panel { padding: 22px; margin-top: 22px; overflow: hidden; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+    .card { padding: 16px; background: var(--panel-2); }
+    .card .label { color: var(--muted); font-size: .82rem; }
+    .card .value { margin-top: 4px; color: var(--blue); font-size: 1.55rem; font-weight: 750; }
+    .card .help { margin-top: 8px; color: var(--muted); font-size: .78rem; }
+    .targets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+    @media (max-width: 850px) { .targets { grid-template-columns: 1fr; } }
+    .target-title { display: flex; align-items: center; gap: 10px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th, td { padding: 10px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; }
+    td:nth-child(2) { font-variant-numeric: tabular-nums; color: var(--blue); white-space: nowrap; }
+    code { padding: 2px 6px; border-radius: 5px; background: #0c1326; color: #b9ddff; }
+    .definition { color: var(--muted); font-size: .82rem; }
+    .source { overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Objetivos <span style="color:var(--blue)">t0</span> y <span style="color:var(--cyan)">t1</span></h1>
+      <p class="subtitle">Distribución, relación entre targets y dependencia temporal.</p>
+    </header>
+
+    <div id="missing" class="status" hidden>
+      No encontré datos todavía. Ejecuta desde la raíz del proyecto:<br><br>
+      <code>.\.venv\Scripts\python.exe my_solution\explore\objectives\objectives.py --max-sequences 10</code><br><br>
+      Después vuelve a abrir o recarga este archivo.
+    </div>
+
+    <div id="dashboard" hidden>
+      <section class="panel">
+        <h2>Resumen del análisis</h2>
+        <div id="summary" class="cards"></div>
+        <p id="source" class="muted source"></p>
+      </section>
+
+      <section class="panel">
+        <h2>Cómo leer las correlaciones</h2>
+        <p class="definition">
+          Una correlación cercana a <strong>1</strong> indica que los valores tienden a moverse juntos;
+          cercana a <strong>0</strong>, que no hay una relación lineal clara; y cercana a
+          <strong>-1</strong>, que suelen moverse en direcciones opuestas. Esto no demuestra causalidad
+          ni revela por sí solo el horizonte real de los targets.
+        </p>
+      </section>
+
+      <section id="targets" class="targets"></section>
+
+      <section class="panel">
+        <h2>Exactitud de los cálculos</h2>
+        <p><strong>Exactos:</strong> cantidad, media, desviación, extremos, porcentajes por umbral y correlaciones. Se recorren todas las filas seleccionadas sin cargar el dataset completo en RAM.</p>
+        <p><strong>Aproximados:</strong> percentiles y outliers. Se calculan sobre una muestra estratificada por secuencia.</p>
+        <p><strong>Importante:</strong> estas son correlaciones Pearson normales, no la métrica Weighted Pearson utilizada por la competencia.</p>
+      </section>
+    </div>
+  </main>
+
+  <script src="results/objectives_report.js"></script>
+  <script>
+    const report = window.OBJECTIVES_REPORT;
+    const dashboard = document.getElementById("dashboard");
+    const missing = document.getElementById("missing");
+
+    if (!report) {
+      missing.hidden = false;
+    } else {
+      dashboard.hidden = false;
+      renderReport(report);
+    }
+
+    function format(value, digits = 6) {
+      if (value === null || value === undefined) return "—";
+      if (typeof value !== "number") return String(value);
+      if (!Number.isFinite(value)) return "no definido";
+      const abs = Math.abs(value);
+      if (abs !== 0 && (abs < 1e-4 || abs >= 1e6)) return value.toExponential(4);
+      return value.toLocaleString("es-UY", { maximumFractionDigits: digits });
+    }
+
+    function percentage(value) { return `${format(value, 4)} %`; }
+
+    function addCard(container, label, value, help) {
+      const card = document.createElement("article");
+      card.className = "card";
+      card.innerHTML = `<div class="label"></div><div class="value"></div><div class="help"></div>`;
+      card.querySelector(".label").textContent = label;
+      card.querySelector(".value").textContent = value;
+      card.querySelector(".help").textContent = help;
+      container.appendChild(card);
+    }
+
+    function correlationMeaning(value) {
+      const strength = Math.abs(value);
+      const direction = value < 0 ? "negativa" : "positiva";
+      if (!Number.isFinite(value)) return "No se pudo calcular, normalmente por falta de variación.";
+      if (strength < 0.1) return "Relación lineal prácticamente inexistente.";
+      if (strength < 0.3) return `Relación ${direction} débil.`;
+      if (strength < 0.6) return `Relación ${direction} moderada.`;
+      if (strength < 0.85) return `Relación ${direction} fuerte.`;
+      return `Relación ${direction} muy fuerte.`;
+    }
+
+    function row(tableBody, metric, value, explanation) {
+      const tr = document.createElement("tr");
+      for (const text of [metric, value, explanation]) {
+        const td = document.createElement("td");
+        td.textContent = text;
+        tr.appendChild(td);
+      }
+      tableBody.appendChild(tr);
+    }
+
+    function makeTable() {
+      const table = document.createElement("table");
+      table.innerHTML = "<thead><tr><th>Valor</th><th>Resultado</th><th>Qué significa</th></tr></thead><tbody></tbody>";
+      return table;
+    }
+
+    function renderReport(data) {
+      const summary = document.getElementById("summary");
+      addCard(summary, "Secuencias analizadas", format(data.sequences_analyzed, 0),
+        `De ${format(data.sequences_available, 0)} secuencias disponibles.`);
+      addCard(summary, "Filas seleccionadas", format(data.selected_rows, 0),
+        data.selection.include_warmup ? "Incluye las filas de calentamiento." : "Excluye los pasos de calentamiento 0–98.");
+      addCard(summary, "corr(t0, t1)", format(data.corr_t0_t1),
+        correlationMeaning(data.corr_t0_t1));
+      addCard(summary, "Dominio", data.selection.scored_only ? "Solo scored" : "Predicción requerida",
+        data.selection.scored_only ? "Solo filas marcadas is_scored." : "Todas las filas donde need_prediction es verdadero.");
+      document.getElementById("source").textContent = `Archivo analizado: ${data.dataset}`;
+
+      const targetContainer = document.getElementById("targets");
+      for (const targetName of ["t0", "t1"]) {
+        targetContainer.appendChild(renderTarget(targetName, data.targets[targetName]));
+      }
+    }
+
+    function renderTarget(name, target) {
+      const section = document.createElement("section");
+      section.className = "panel";
+      const title = document.createElement("h2");
+      title.className = "target-title";
+      title.innerHTML = `<span class="dot"></span><span></span>`;
+      title.lastElementChild.textContent = `Target ${name}`;
+      section.appendChild(title);
+
+      const mainTable = makeTable();
+      const body = mainTable.querySelector("tbody");
+      row(body, "count", format(target.count, 0), "Cantidad total de valores utilizados para este target.");
+      row(body, "mean", format(target.mean), "Promedio. Cerca de cero sugiere una distribución globalmente centrada.");
+      row(body, "std_population", format(target.std_population), "Dispersión típica respecto de la media; cuanto mayor, más variable es el target.");
+      row(body, "min", format(target.min), "Menor valor observado.");
+      row(body, "max", format(target.max), "Mayor valor observado.");
+      row(body, "outside [-2, 2]", percentage(target.outside_minus2_plus2_pct), "Valores que la métrica recortará antes de puntuar.");
+      row(body, "sample_size", format(target.sample_size, 0), "Filas usadas para estimar percentiles y outliers.");
+      section.appendChild(mainTable);
+
+      const nearTitle = document.createElement("h3");
+      nearTitle.textContent = "Valores cerca de cero";
+      section.appendChild(nearTitle);
+      const nearTable = makeTable();
+      const nearBody = nearTable.querySelector("tbody");
+      for (const [threshold, value] of Object.entries(target.near_zero_pct)) {
+        row(nearBody, `|${name}| ≤ ${threshold}`, percentage(value),
+          "Proporción de observaciones cuyo valor absoluto no supera este umbral.");
+      }
+      section.appendChild(nearTable);
+
+      const percentileTitle = document.createElement("h3");
+      percentileTitle.textContent = "Percentiles aproximados";
+      section.appendChild(percentileTitle);
+      const percentileTable = makeTable();
+      const percentileBody = percentileTable.querySelector("tbody");
+      for (const [percentile, value] of Object.entries(target.percentiles_approx)) {
+        row(percentileBody, `p${percentile}`, format(value),
+          `${percentile}% de la muestra queda en este valor o por debajo.`);
+      }
+      section.appendChild(percentileTable);
+
+      const autoTitle = document.createElement("h3");
+      autoTitle.textContent = "Autocorrelación dentro de cada secuencia";
+      section.appendChild(autoTitle);
+      const autoTable = makeTable();
+      const autoBody = autoTable.querySelector("tbody");
+      for (const [lag, value] of Object.entries(target.autocorrelation)) {
+        row(autoBody, `lag ${lag}`, format(value),
+          `${correlationMeaning(value)} Compara ${name}(t) con ${name}(t-${lag}).`);
+      }
+      section.appendChild(autoTable);
+
+      const outlierTitle = document.createElement("h3");
+      outlierTitle.textContent = "Outliers aproximados";
+      section.appendChild(outlierTitle);
+      const outlierTable = makeTable();
+      const outlierBody = outlierTable.querySelector("tbody");
+      row(outlierBody, "IQR", format(target.sample_iqr), "Distancia entre los percentiles 25 y 75; resume la amplitud de la zona central.");
+      row(outlierBody, "Límites IQR", target.sample_iqr_outlier_limits.map(v => format(v)).join(" a "), "Fuera de Q1 − 1.5×IQR y Q3 + 1.5×IQR se marca un posible outlier.");
+      row(outlierBody, "Outliers IQR", percentage(target.sample_iqr_outlier_pct), "Porcentaje de la muestra fuera de los límites IQR.");
+      row(outlierBody, "|z| > 3", percentage(target.sample_abs_z_gt_3_pct), "Porcentaje a más de tres desviaciones estándar de la media muestral.");
+      section.appendChild(outlierTable);
+
+      return section;
+    }
+  </script>
+</body>
+</html>
