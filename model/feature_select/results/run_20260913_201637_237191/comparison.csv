@@ -1,0 +1,3 @@
+variant,top_k_per_target,input_features,added_features,wp_t0,wp_t1,wp_mean,delta_vs_base_t0,delta_vs_base_t1,delta_vs_base_mean,eligible_blocks,validation_groups
+top3_plus_v21_delta5,3,119,7,0.4843645723385056,0.4239709525519079,0.45416776244520674,,,,50,50
+top3_plus_p3_delta50,3,119,7,0.4611425819401691,0.38655921040863633,0.42385089617440275,,,,50,50

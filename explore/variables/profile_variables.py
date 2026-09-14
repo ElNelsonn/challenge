@@ -125,10 +125,15 @@ def main() -> None:
     args = build_parser().parse_args()
     try:
         from ydata_profiling import ProfileReport
-    except ImportError as exc:
+    except ModuleNotFoundError as exc:
+        if exc.name == "ydata_profiling":
+            raise SystemExit(
+                "Falta ydata-profiling. Instálalo en el entorno activo con: "
+                "python -m pip install ydata-profiling"
+            ) from exc
         raise SystemExit(
-            "Falta ydata-profiling. Instálalo en el entorno activo con: "
-            "python -m pip install ydata-profiling"
+            f"ydata-profiling está instalado, pero falta una dependencia: {exc.name}. "
+            "Comprueba las dependencias del entorno."
         ) from exc
 
     parquet = pq.ParquetFile(args.dataset)

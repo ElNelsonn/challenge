@@ -1,0 +1,26 @@
+{
+  "t0": {
+    "mean_delta": -0.010483816650828915,
+    "median_delta": -0.014345611461218488,
+    "min_delta": -0.02546165757546992,
+    "max_delta": 0.011112144524845546,
+    "rounds_improved": 1,
+    "rounds": 5
+  },
+  "t1": {
+    "mean_delta": -0.005021989048946273,
+    "median_delta": -0.004116535891436568,
+    "min_delta": -0.013814878405824405,
+    "max_delta": 0.008183300688971551,
+    "rounds_improved": 1,
+    "rounds": 5
+  },
+  "mean": {
+    "mean_delta": -0.007752902849887611,
+    "median_delta": -0.014080244933521446,
+    "min_delta": -0.014795338259512292,
+    "max_delta": 0.009647722606908493,
+    "rounds_improved": 1,
+    "rounds": 5
+  }
+}
