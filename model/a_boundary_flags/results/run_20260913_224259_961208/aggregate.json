@@ -1,0 +1,20 @@
+{
+  "t0": {
+    "mean_delta": -0.014522650129975511,
+    "median_delta": -0.0069797556946971095,
+    "rounds_improved": 1,
+    "rounds": 5
+  },
+  "t1": {
+    "mean_delta": -0.007512269837593943,
+    "median_delta": -0.007397277058672103,
+    "rounds_improved": 1,
+    "rounds": 5
+  },
+  "mean": {
+    "mean_delta": -0.011017459983784695,
+    "median_delta": -0.008236091712123361,
+    "rounds_improved": 1,
+    "rounds": 5
+  }
+}
