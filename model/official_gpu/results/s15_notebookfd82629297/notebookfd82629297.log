@@ -1,0 +1,297 @@
+[{"stream_name":"stderr","time":8.222742586,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.222807534,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.222813768,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.222817795,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":8.911998716,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.912043453999999,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.912047857,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.912050961,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":18.332793833,"data":"GPU: Tesla T4 | torch 2.11.0+cu128\n"}
+,{"stream_name":"stdout","time":18.332825546,"data":"Inputs OK\n"}
+,{"stream_name":"stdout","time":18.34861094,"data":"Writing utils.py\n"}
+,{"stream_name":"stdout","time":18.382123351,"data":"Writing train_official_gpu_v1.py\n"}
+,{"stream_name":"stdout","time":18.412224957,"data":"AUC del modelo de la máscara: 0.7944451467595558 | tasa base de filas puntuadas: 0.094\n"}
+,{"stream_name":"stdout","time":21.914844342,"data":"device=cuda  batch=32  chunk=512  torch=2.11.0+cu128\r\n"}
+,{"stream_name":"stdout","time":29.776693165,"data":"Normalizador: 32 grupos, 112 entradas (5s)\r\n"}
+,{"stream_name":"stdout","time":36.226280091,"data":"Destilación: 4 teachers, peso 1.0\r\n"}
+,{"stream_name":"stdout","time":38.458903994,"data":"  soft targets 32/32 (0.0 min)\r\n"}
+,{"stream_name":"stdout","time":38.458943902,"data":"Pesado por probabilidad de ser puntuada (AUC 0.794), potencia 1.0\r\n"}
+,{"stream_name":"stdout","time":38.458951334,"data":"LSTM h=128 x2  entradas=112  params=256,258\r\n"}
+,{"stream_name":"stdout","time":38.458955377,"data":"época 1: lr=5.00e-04\r\n"}
+,{"stream_name":"stdout","time":41.509401209,"data":"época 1/1 batch 1/1  loss=2.1546  transcurrido 0.1 min  restante ~0.0 min\r\n"}
+,{"stream_name":"stdout","time":42.271870751,"data":"  [época 1] valid GLOBAL WP=0.4592 (t0=0.3339, t1=0.5845)   [por secuencia: 0.5122]  (1s)\r\n"}
+,{"stream_name":"stdout","time":42.322718075,"data":"Mejor valid WP: 0.4592   Resultados en /kaggle/tmp/smoke/smoke\r\n"}
+,{"stream_name":"stdout","time":46.45477114,"data":"Prueba de humo OK, valid WP: 0.45923788159912715\n"}
+,{"stream_name":"stdout","time":48.995761256,"data":"device=cuda  batch=32  chunk=512  torch=2.11.0+cu128\r\n"}
+,{"stream_name":"stdout","time":78.267600178,"data":"Normalizador: 200 grupos, 112 entradas (27s)\r\n"}
+,{"stream_name":"stdout","time":79.634059145,"data":"Destilación: 4 teachers, peso 1.0\r\n"}
+,{"stream_name":"stdout","time":85.271024966,"data":"  soft targets 32/10607 (0.1 min)\r\n"}
+,{"stream_name":"stdout","time":158.456152298,"data":"  soft targets 1088/10607 (1.3 min)\r\n"}
+,{"stream_name":"stdout","time":233.820636179,"data":"  soft targets 2144/10607 (2.6 min)\r\n"}
+,{"stream_name":"stdout","time":312.101936857,"data":"  soft targets 3200/10607 (3.9 min)\r\n"}
+,{"stream_name":"stdout","time":394.329830011,"data":"  soft targets 4256/10607 (5.2 min)\r\n"}
+,{"stream_name":"stdout","time":481.278084186,"data":"  soft targets 5312/10607 (6.7 min)\r\n"}
+,{"stream_name":"stdout","time":558.422354421,"data":"  soft targets 6368/10607 (8.0 min)\r\n"}
+,{"stream_name":"stdout","time":632.494190344,"data":"  soft targets 7424/10607 (9.2 min)\r\n"}
+,{"stream_name":"stdout","time":719.055377538,"data":"  soft targets 8480/10607 (10.7 min)\r\n"}
+,{"stream_name":"stdout","time":817.632390766,"data":"  soft targets 9536/10607 (12.3 min)\r\n"}
+,{"stream_name":"stdout","time":902.799502474,"data":"  soft targets 10592/10607 (13.7 min)\r\n"}
+,{"stream_name":"stdout","time":903.353158495,"data":"  soft targets 10607/10607 (13.7 min)\r\n"}
+,{"stream_name":"stdout","time":904.066895347,"data":"Soft targets guardados en /kaggle/tmp/soft_S8.npz (849 MB, 13.7 min)\r\n"}
+,{"stream_name":"stdout","time":904.066928638,"data":"Pesado por probabilidad de ser puntuada (AUC 0.794), potencia 1.0\r\n"}
+,{"stream_name":"stdout","time":904.066933296,"data":"LSTM h=128 x2  entradas=112  params=256,258\r\n"}
+,{"stream_name":"stdout","time":904.118439708,"data":"época 1: lr=5.00e-04\r\n"}
+,{"stream_name":"stdout","time":908.801817548,"data":"época 1/10 batch 1/332  loss=2.1139  transcurrido 0.1 min  restante ~260.2 min\r\n"}
+,{"stream_name":"stdout","time":931.697822596,"data":"época 1/10 batch 17/332  loss=1.7832  transcurrido 0.5 min  restante ~89.4 min\r\n"}
+,{"stream_name":"stdout","time":953.864393845,"data":"época 1/10 batch 33/332  loss=1.6561  transcurrido 0.8 min  restante ~82.6 min\r\n"}
+,{"stream_name":"stdout","time":976.529892165,"data":"época 1/10 batch 49/332  loss=1.6403  transcurrido 1.2 min  restante ~80.6 min\r\n"}
+,{"stream_name":"stdout","time":999.07135197,"data":"época 1/10 batch 65/332  loss=1.6320  transcurrido 1.6 min  restante ~79.3 min\r\n"}
+,{"stream_name":"stdout","time":1022.097998298,"data":"época 1/10 batch 81/332  loss=1.5809  transcurrido 2.0 min  restante ~78.7 min\r\n"}
+,{"stream_name":"stdout","time":1044.423790163,"data":"época 1/10 batch 97/332  loss=1.5650  transcurrido 2.3 min  restante ~77.7 min\r\n"}
+,{"stream_name":"stdout","time":1066.339223336,"data":"época 1/10 batch 113/332  loss=1.5806  transcurrido 2.7 min  restante ~76.7 min\r\n"}
+,{"stream_name":"stdout","time":1088.326879219,"data":"época 1/10 batch 129/332  loss=1.5426  transcurrido 3.1 min  restante ~76.0 min\r\n"}
+,{"stream_name":"stdout","time":1111.402309135,"data":"época 1/10 batch 145/332  loss=1.5525  transcurrido 3.5 min  restante ~75.7 min\r\n"}
+,{"stream_name":"stdout","time":1134.698811535,"data":"época 1/10 batch 161/332  loss=1.5810  transcurrido 3.8 min  restante ~75.4 min\r\n"}
+,{"stream_name":"stdout","time":1159.41359432,"data":"época 1/10 batch 177/332  loss=1.5746  transcurrido 4.3 min  restante ~75.6 min\r\n"}
+,{"stream_name":"stdout","time":1184.232501079,"data":"época 1/10 batch 193/332  loss=1.5355  transcurrido 4.7 min  restante ~75.6 min\r\n"}
+,{"stream_name":"stdout","time":1211.630088516,"data":"época 1/10 batch 209/332  loss=1.4935  transcurrido 5.1 min  restante ~76.3 min\r\n"}
+,{"stream_name":"stdout","time":1241.369833179,"data":"época 1/10 batch 225/332  loss=1.5504  transcurrido 5.6 min  restante ~77.3 min\r\n"}
+,{"stream_name":"stdout","time":1272.012736308,"data":"época 1/10 batch 241/332  loss=1.5191  transcurrido 6.1 min  restante ~78.3 min\r\n"}
+,{"stream_name":"stdout","time":1306.977357289,"data":"época 1/10 batch 257/332  loss=1.4783  transcurrido 6.7 min  restante ~80.0 min\r\n"}
+,{"stream_name":"stdout","time":1341.681165101,"data":"época 1/10 batch 273/332  loss=1.4951  transcurrido 7.3 min  restante ~81.4 min\r\n"}
+,{"stream_name":"stdout","time":1382.425576267,"data":"época 1/10 batch 289/332  loss=1.4965  transcurrido 8.0 min  restante ~83.6 min\r\n"}
+,{"stream_name":"stdout","time":1424.65216457,"data":"época 1/10 batch 305/332  loss=1.5097  transcurrido 8.7 min  restante ~85.8 min\r\n"}
+,{"stream_name":"stdout","time":1467.889051237,"data":"época 1/10 batch 321/332  loss=1.4888  transcurrido 9.4 min  restante ~87.8 min\r\n"}
+,{"stream_name":"stdout","time":1494.436107785,"data":"época 1/10 batch 332/332  loss=1.5070  transcurrido 9.8 min  restante ~88.5 min\r\n"}
+,{"stream_name":"stdout","time":1869.17186938,"data":"  [época 1] valid GLOBAL WP=0.6751 (t0=0.6705, t1=0.6796)   [por secuencia: 0.6326]  (375s)\r\n"}
+,{"stream_name":"stdout","time":1981.897509136,"data":"época 2: lr=4.50e-04\r\n"}
+,{"stream_name":"stdout","time":1985.910094123,"data":"época 2/10 batch 1/332  loss=1.4881  transcurrido 18.0 min  restante ~161.7 min\r\n"}
+,{"stream_name":"stdout","time":2007.996400804,"data":"época 2/10 batch 17/332  loss=1.5131  transcurrido 18.4 min  restante ~156.6 min\r\n"}
+,{"stream_name":"stdout","time":2030.053630018,"data":"época 2/10 batch 33/332  loss=1.4796  transcurrido 18.8 min  restante ~151.9 min\r\n"}
+,{"stream_name":"stdout","time":2052.486386387,"data":"época 2/10 batch 49/332  loss=1.5626  transcurrido 19.1 min  restante ~147.6 min\r\n"}
+,{"stream_name":"stdout","time":2075.234500715,"data":"época 2/10 batch 65/332  loss=1.5137  transcurrido 19.5 min  restante ~143.7 min\r\n"}
+,{"stream_name":"stdout","time":2098.068568145,"data":"época 2/10 batch 81/332  loss=1.4698  transcurrido 19.9 min  restante ~140.1 min\r\n"}
+,{"stream_name":"stdout","time":2120.509420856,"data":"época 2/10 batch 97/332  loss=1.4762  transcurrido 20.3 min  restante ~136.6 min\r\n"}
+,{"stream_name":"stdout","time":2143.41491098,"data":"época 2/10 batch 113/332  loss=1.4403  transcurrido 20.7 min  restante ~133.4 min\r\n"}
+,{"stream_name":"stdout","time":2166.270900113,"data":"época 2/10 batch 129/332  loss=1.4909  transcurrido 21.0 min  restante ~130.5 min\r\n"}
+,{"stream_name":"stdout","time":2189.412848645,"data":"época 2/10 batch 145/332  loss=1.4951  transcurrido 21.4 min  restante ~127.7 min\r\n"}
+,{"stream_name":"stdout","time":2212.370834075,"data":"época 2/10 batch 161/332  loss=1.5228  transcurrido 21.8 min  restante ~125.0 min\r\n"}
+,{"stream_name":"stdout","time":2237.451018642,"data":"época 2/10 batch 177/332  loss=1.5362  transcurrido 22.2 min  restante ~122.7 min\r\n"}
+,{"stream_name":"stdout","time":2261.414647794,"data":"época 2/10 batch 193/332  loss=1.4414  transcurrido 22.6 min  restante ~120.4 min\r\n"}
+,{"stream_name":"stdout","time":2284.703814374,"data":"época 2/10 batch 209/332  loss=1.4463  transcurrido 23.0 min  restante ~118.2 min\r\n"}
+,{"stream_name":"stdout","time":2309.802464909,"data":"época 2/10 batch 225/332  loss=1.4901  transcurrido 23.4 min  restante ~116.2 min\r\n"}
+,{"stream_name":"stdout","time":2336.076756274,"data":"época 2/10 batch 241/332  loss=1.5271  transcurrido 23.9 min  restante ~114.4 min\r\n"}
+,{"stream_name":"stdout","time":2362.172742551,"data":"época 2/10 batch 257/332  loss=1.5204  transcurrido 24.3 min  restante ~112.7 min\r\n"}
+,{"stream_name":"stdout","time":2387.562549848,"data":"época 2/10 batch 273/332  loss=1.4324  transcurrido 24.7 min  restante ~111.0 min\r\n"}
+,{"stream_name":"stdout","time":2413.515164074,"data":"época 2/10 batch 289/332  loss=1.5336  transcurrido 25.2 min  restante ~109.3 min\r\n"}
+,{"stream_name":"stdout","time":2440.313434909,"data":"época 2/10 batch 305/332  loss=1.4490  transcurrido 25.6 min  restante ~107.8 min\r\n"}
+,{"stream_name":"stdout","time":2469.664838294,"data":"época 2/10 batch 321/332  loss=1.5166  transcurrido 26.1 min  restante ~106.6 min\r\n"}
+,{"stream_name":"stdout","time":2487.951708115,"data":"época 2/10 batch 332/332  loss=1.4667  transcurrido 26.4 min  restante ~105.6 min\r\n"}
+,{"stream_name":"stdout","time":2594.312501249,"data":"  [época 2] valid GLOBAL WP=0.6795 (t0=0.6751, t1=0.6840)   [por secuencia: 0.6357]  (106s)\r\n"}
+,{"stream_name":"stdout","time":2705.089997909,"data":"época 3: lr=4.05e-04\r\n"}
+,{"stream_name":"stdout","time":2708.546557154,"data":"época 3/10 batch 1/332  loss=1.5965  transcurrido 30.1 min  restante ~120.1 min\r\n"}
+,{"stream_name":"stdout","time":2730.018924127,"data":"época 3/10 batch 17/332  loss=1.4368  transcurrido 30.4 min  restante ~117.9 min\r\n"}
+,{"stream_name":"stdout","time":2751.302451574,"data":"época 3/10 batch 33/332  loss=1.4660  transcurrido 30.8 min  restante ~115.9 min\r\n"}
+,{"stream_name":"stdout","time":2772.393620204,"data":"época 3/10 batch 49/332  loss=1.4598  transcurrido 31.1 min  restante ~113.9 min\r\n"}
+,{"stream_name":"stdout","time":2794.086943771,"data":"época 3/10 batch 65/332  loss=1.5152  transcurrido 31.5 min  restante ~112.0 min\r\n"}
+,{"stream_name":"stdout","time":2815.954312113,"data":"época 3/10 batch 81/332  loss=1.4540  transcurrido 31.9 min  restante ~110.1 min\r\n"}
+,{"stream_name":"stdout","time":2837.57959205,"data":"época 3/10 batch 97/332  loss=1.4591  transcurrido 32.2 min  restante ~108.4 min\r\n"}
+,{"stream_name":"stdout","time":2859.340462354,"data":"época 3/10 batch 113/332  loss=1.4938  transcurrido 32.6 min  restante ~106.7 min\r\n"}
+,{"stream_name":"stdout","time":2881.58343481,"data":"época 3/10 batch 129/332  loss=1.4812  transcurrido 33.0 min  restante ~105.0 min\r\n"}
+,{"stream_name":"stdout","time":2905.041400681,"data":"época 3/10 batch 145/332  loss=1.4483  transcurrido 33.3 min  restante ~103.5 min\r\n"}
+,{"stream_name":"stdout","time":2928.306353707,"data":"época 3/10 batch 161/332  loss=1.4398  transcurrido 33.7 min  restante ~102.0 min\r\n"}
+,{"stream_name":"stdout","time":2950.744442464,"data":"época 3/10 batch 177/332  loss=1.4901  transcurrido 34.1 min  restante ~100.5 min\r\n"}
+,{"stream_name":"stdout","time":2974.643907438,"data":"época 3/10 batch 193/332  loss=1.4901  transcurrido 34.5 min  restante ~99.2 min\r\n"}
+,{"stream_name":"stdout","time":2998.415748408,"data":"época 3/10 batch 209/332  loss=1.4591  transcurrido 34.9 min  restante ~97.8 min\r\n"}
+,{"stream_name":"stdout","time":3024.749442389,"data":"época 3/10 batch 225/332  loss=1.4440  transcurrido 35.3 min  restante ~96.6 min\r\n"}
+,{"stream_name":"stdout","time":3049.167153667,"data":"época 3/10 batch 241/332  loss=1.4695  transcurrido 35.8 min  restante ~95.4 min\r\n"}
+,{"stream_name":"stdout","time":3076.612218275,"data":"época 3/10 batch 257/332  loss=1.4834  transcurrido 36.2 min  restante ~94.3 min\r\n"}
+,{"stream_name":"stdout","time":3101.14305655,"data":"época 3/10 batch 273/332  loss=1.4570  transcurrido 36.6 min  restante ~93.1 min\r\n"}
+,{"stream_name":"stdout","time":3126.241379582,"data":"época 3/10 batch 289/332  loss=1.4697  transcurrido 37.0 min  restante ~92.0 min\r\n"}
+,{"stream_name":"stdout","time":3152.134744658,"data":"época 3/10 batch 305/332  loss=1.4884  transcurrido 37.5 min  restante ~90.9 min\r\n"}
+,{"stream_name":"stdout","time":3177.753221924,"data":"época 3/10 batch 321/332  loss=1.4633  transcurrido 37.9 min  restante ~89.8 min\r\n"}
+,{"stream_name":"stdout","time":3193.911499748,"data":"época 3/10 batch 332/332  loss=1.5158  transcurrido 38.2 min  restante ~89.0 min\r\n"}
+,{"stream_name":"stdout","time":3476.363543346,"data":"  [época 3] valid GLOBAL WP=0.6815 (t0=0.6779, t1=0.6850)   [por secuencia: 0.6379]  (282s)\r\n"}
+,{"stream_name":"stdout","time":3587.258049734,"data":"época 4: lr=3.65e-04\r\n"}
+,{"stream_name":"stdout","time":3590.565071248,"data":"época 4/10 batch 1/332  loss=1.7192  transcurrido 44.8 min  restante ~104.3 min\r\n"}
+,{"stream_name":"stdout","time":3612.386927696,"data":"época 4/10 batch 17/332  loss=1.4893  transcurrido 45.1 min  restante ~102.8 min\r\n"}
+,{"stream_name":"stdout","time":3634.744208867,"data":"época 4/10 batch 33/332  loss=1.4824  transcurrido 45.5 min  restante ~101.3 min\r\n"}
+,{"stream_name":"stdout","time":3656.164027214,"data":"época 4/10 batch 49/332  loss=1.4417  transcurrido 45.9 min  restante ~99.9 min\r\n"}
+,{"stream_name":"stdout","time":3678.062878721,"data":"época 4/10 batch 65/332  loss=1.5076  transcurrido 46.2 min  restante ~98.4 min\r\n"}
+,{"stream_name":"stdout","time":3700.487576379,"data":"época 4/10 batch 81/332  loss=1.4270  transcurrido 46.6 min  restante ~97.1 min\r\n"}
+,{"stream_name":"stdout","time":3725.02464195,"data":"época 4/10 batch 97/332  loss=1.4757  transcurrido 47.0 min  restante ~95.8 min\r\n"}
+,{"stream_name":"stdout","time":3747.917242768,"data":"época 4/10 batch 113/332  loss=1.4637  transcurrido 47.4 min  restante ~94.5 min\r\n"}
+,{"stream_name":"stdout","time":3773.484955237,"data":"época 4/10 batch 129/332  loss=1.4231  transcurrido 47.8 min  restante ~93.3 min\r\n"}
+,{"stream_name":"stdout","time":3797.843028577,"data":"época 4/10 batch 145/332  loss=1.4467  transcurrido 48.2 min  restante ~92.1 min\r\n"}
+,{"stream_name":"stdout","time":3824.453100495,"data":"época 4/10 batch 161/332  loss=1.4344  transcurrido 48.7 min  restante ~91.0 min\r\n"}
+,{"stream_name":"stdout","time":3850.200371637,"data":"época 4/10 batch 177/332  loss=1.4627  transcurrido 49.1 min  restante ~89.9 min\r\n"}
+,{"stream_name":"stdout","time":3877.179286019,"data":"época 4/10 batch 193/332  loss=1.4871  transcurrido 49.6 min  restante ~88.8 min\r\n"}
+,{"stream_name":"stdout","time":3903.57392036,"data":"época 4/10 batch 209/332  loss=1.4299  transcurrido 50.0 min  restante ~87.7 min\r\n"}
+,{"stream_name":"stdout","time":3929.688807389,"data":"época 4/10 batch 225/332  loss=1.4399  transcurrido 50.4 min  restante ~86.7 min\r\n"}
+,{"stream_name":"stdout","time":3956.077313247,"data":"época 4/10 batch 241/332  loss=1.4807  transcurrido 50.9 min  restante ~85.7 min\r\n"}
+,{"stream_name":"stdout","time":3982.235089689,"data":"época 4/10 batch 257/332  loss=1.4491  transcurrido 51.3 min  restante ~84.6 min\r\n"}
+,{"stream_name":"stdout","time":4011.271384914,"data":"época 4/10 batch 273/332  loss=1.4700  transcurrido 51.8 min  restante ~83.7 min\r\n"}
+,{"stream_name":"stdout","time":4042.870414558,"data":"época 4/10 batch 289/332  loss=1.4290  transcurrido 52.3 min  restante ~82.8 min\r\n"}
+,{"stream_name":"stdout","time":4071.872298632,"data":"época 4/10 batch 305/332  loss=1.4335  transcurrido 52.8 min  restante ~81.9 min\r\n"}
+,{"stream_name":"stdout","time":4098.892574362,"data":"época 4/10 batch 321/332  loss=1.4769  transcurrido 53.2 min  restante ~81.0 min\r\n"}
+,{"stream_name":"stdout","time":4117.430741266,"data":"época 4/10 batch 332/332  loss=1.3990  transcurrido 53.6 min  restante ~80.3 min\r\n"}
+,{"stream_name":"stdout","time":4245.662538698,"data":"  [época 4] valid GLOBAL WP=0.6816 (t0=0.6778, t1=0.6854)   [por secuencia: 0.6366]  (128s)\r\n"}
+,{"stream_name":"stdout","time":4356.940664113,"data":"época 5: lr=3.28e-04\r\n"}
+,{"stream_name":"stdout","time":4360.299046705,"data":"época 5/10 batch 1/332  loss=1.4827  transcurrido 57.6 min  restante ~86.3 min\r\n"}
+,{"stream_name":"stdout","time":4381.776099848,"data":"época 5/10 batch 17/332  loss=1.4402  transcurrido 58.0 min  restante ~85.1 min\r\n"}
+,{"stream_name":"stdout","time":4403.315294227,"data":"época 5/10 batch 33/332  loss=1.4616  transcurrido 58.3 min  restante ~83.9 min\r\n"}
+,{"stream_name":"stdout","time":4424.617318348,"data":"época 5/10 batch 49/332  loss=1.4544  transcurrido 58.7 min  restante ~82.8 min\r\n"}
+,{"stream_name":"stdout","time":4445.617614162,"data":"época 5/10 batch 65/332  loss=1.4598  transcurrido 59.0 min  restante ~81.7 min\r\n"}
+,{"stream_name":"stdout","time":4467.384510086,"data":"época 5/10 batch 81/332  loss=1.4425  transcurrido 59.4 min  restante ~80.5 min\r\n"}
+,{"stream_name":"stdout","time":4488.252409037,"data":"época 5/10 batch 97/332  loss=1.4094  transcurrido 59.7 min  restante ~79.4 min\r\n"}
+,{"stream_name":"stdout","time":4509.658726909,"data":"época 5/10 batch 113/332  loss=1.4715  transcurrido 60.1 min  restante ~78.4 min\r\n"}
+,{"stream_name":"stdout","time":4532.619361049,"data":"época 5/10 batch 129/332  loss=1.4493  transcurrido 60.5 min  restante ~77.3 min\r\n"}
+,{"stream_name":"stdout","time":4554.910611201,"data":"época 5/10 batch 145/332  loss=1.4484  transcurrido 60.8 min  restante ~76.3 min\r\n"}
+,{"stream_name":"stdout","time":4578.375930446,"data":"época 5/10 batch 161/332  loss=1.4019  transcurrido 61.2 min  restante ~75.3 min\r\n"}
+,{"stream_name":"stdout","time":4602.581350243,"data":"época 5/10 batch 177/332  loss=1.4250  transcurrido 61.6 min  restante ~74.3 min\r\n"}
+,{"stream_name":"stdout","time":4627.169645883,"data":"época 5/10 batch 193/332  loss=1.4124  transcurrido 62.1 min  restante ~73.4 min\r\n"}
+,{"stream_name":"stdout","time":4652.500780282,"data":"época 5/10 batch 209/332  loss=1.4347  transcurrido 62.5 min  restante ~72.5 min\r\n"}
+,{"stream_name":"stdout","time":4678.506294777,"data":"época 5/10 batch 225/332  loss=1.4683  transcurrido 62.9 min  restante ~71.6 min\r\n"}
+,{"stream_name":"stdout","time":4706.774212867,"data":"época 5/10 batch 241/332  loss=1.4247  transcurrido 63.4 min  restante ~70.7 min\r\n"}
+,{"stream_name":"stdout","time":4733.530213011,"data":"época 5/10 batch 257/332  loss=1.4395  transcurrido 63.8 min  restante ~69.9 min\r\n"}
+,{"stream_name":"stdout","time":4760.126684028,"data":"época 5/10 batch 273/332  loss=1.4522  transcurrido 64.3 min  restante ~69.0 min\r\n"}
+,{"stream_name":"stdout","time":4785.068709891,"data":"época 5/10 batch 289/332  loss=1.4648  transcurrido 64.7 min  restante ~68.1 min\r\n"}
+,{"stream_name":"stdout","time":4811.721659673,"data":"época 5/10 batch 305/332  loss=1.4717  transcurrido 65.1 min  restante ~67.3 min\r\n"}
+,{"stream_name":"stdout","time":4838.224823706,"data":"época 5/10 batch 321/332  loss=1.4697  transcurrido 65.6 min  restante ~66.4 min\r\n"}
+,{"stream_name":"stdout","time":4856.340606149,"data":"época 5/10 batch 332/332  loss=1.3963  transcurrido 65.9 min  restante ~65.9 min\r\n"}
+,{"stream_name":"stdout","time":5179.727637477,"data":"  [época 5] valid GLOBAL WP=0.6821 (t0=0.6793, t1=0.6849)   [por secuencia: 0.6382]  (323s)\r\n"}
+,{"stream_name":"stdout","time":5294.41470717,"data":"época 6: lr=2.95e-04\r\n"}
+,{"stream_name":"stdout","time":5298.073275725,"data":"época 6/10 batch 1/332  loss=1.4898  transcurrido 73.2 min  restante ~73.1 min\r\n"}
+,{"stream_name":"stdout","time":5319.549666535,"data":"época 6/10 batch 17/332  loss=1.4061  transcurrido 73.6 min  restante ~72.1 min\r\n"}
+,{"stream_name":"stdout","time":5341.495054628,"data":"época 6/10 batch 33/332  loss=1.4230  transcurrido 74.0 min  restante ~71.1 min\r\n"}
+,{"stream_name":"stdout","time":5363.218533528,"data":"época 6/10 batch 49/332  loss=1.3953  transcurrido 74.3 min  restante ~70.1 min\r\n"}
+,{"stream_name":"stdout","time":5385.572298378,"data":"época 6/10 batch 65/332  loss=1.4604  transcurrido 74.7 min  restante ~69.1 min\r\n"}
+,{"stream_name":"stdout","time":5407.54677502,"data":"época 6/10 batch 81/332  loss=1.3725  transcurrido 75.1 min  restante ~68.1 min\r\n"}
+,{"stream_name":"stdout","time":5429.344846409,"data":"época 6/10 batch 97/332  loss=1.4577  transcurrido 75.4 min  restante ~67.1 min\r\n"}
+,{"stream_name":"stdout","time":5451.737089343,"data":"época 6/10 batch 113/332  loss=1.4353  transcurrido 75.8 min  restante ~66.1 min\r\n"}
+,{"stream_name":"stdout","time":5474.597556813,"data":"época 6/10 batch 129/332  loss=1.4038  transcurrido 76.2 min  restante ~65.2 min\r\n"}
+,{"stream_name":"stdout","time":5497.878580686,"data":"época 6/10 batch 145/332  loss=1.4316  transcurrido 76.6 min  restante ~64.3 min\r\n"}
+,{"stream_name":"stdout","time":5522.401427261,"data":"época 6/10 batch 161/332  loss=1.4297  transcurrido 77.0 min  restante ~63.4 min\r\n"}
+,{"stream_name":"stdout","time":5546.265404592,"data":"época 6/10 batch 177/332  loss=1.4732  transcurrido 77.4 min  restante ~62.5 min\r\n"}
+,{"stream_name":"stdout","time":5569.927963823,"data":"época 6/10 batch 193/332  loss=1.4593  transcurrido 77.8 min  restante ~61.6 min\r\n"}
+,{"stream_name":"stdout","time":5592.836498619,"data":"época 6/10 batch 209/332  loss=1.4209  transcurrido 78.1 min  restante ~60.7 min\r\n"}
+,{"stream_name":"stdout","time":5615.993149606,"data":"época 6/10 batch 225/332  loss=1.4020  transcurrido 78.5 min  restante ~59.8 min\r\n"}
+,{"stream_name":"stdout","time":5640.168783604,"data":"época 6/10 batch 241/332  loss=1.4170  transcurrido 78.9 min  restante ~58.9 min\r\n"}
+,{"stream_name":"stdout","time":5663.862533264,"data":"época 6/10 batch 257/332  loss=1.4350  transcurrido 79.3 min  restante ~58.1 min\r\n"}
+,{"stream_name":"stdout","time":5688.221266245,"data":"época 6/10 batch 273/332  loss=1.4942  transcurrido 79.7 min  restante ~57.2 min\r\n"}
+,{"stream_name":"stdout","time":5715.007839139,"data":"época 6/10 batch 289/332  loss=1.4035  transcurrido 80.2 min  restante ~56.4 min\r\n"}
+,{"stream_name":"stdout","time":5742.986036649,"data":"época 6/10 batch 305/332  loss=1.4373  transcurrido 80.6 min  restante ~55.6 min\r\n"}
+,{"stream_name":"stdout","time":5771.861196634,"data":"época 6/10 batch 321/332  loss=1.4638  transcurrido 81.1 min  restante ~54.8 min\r\n"}
+,{"stream_name":"stdout","time":5788.964210217,"data":"época 6/10 batch 332/332  loss=1.4555  transcurrido 81.4 min  restante ~54.3 min\r\n"}
+,{"stream_name":"stdout","time":5936.762711019,"data":"  [época 6] valid GLOBAL WP=0.6820 (t0=0.6789, t1=0.6851)   [por secuencia: 0.6393]  (148s)\r\n"}
+,{"stream_name":"stdout","time":5936.805835548,"data":"época 7: lr=2.66e-04\r\n"}
+,{"stream_name":"stdout","time":5939.870240782,"data":"época 7/10 batch 1/332  loss=1.4238  transcurrido 83.9 min  restante ~55.9 min\r\n"}
+,{"stream_name":"stdout","time":5960.988680169,"data":"época 7/10 batch 17/332  loss=1.3758  transcurrido 84.3 min  restante ~55.0 min\r\n"}
+,{"stream_name":"stdout","time":5982.766521823,"data":"época 7/10 batch 33/332  loss=1.3670  transcurrido 84.6 min  restante ~54.1 min\r\n"}
+,{"stream_name":"stdout","time":6004.232453088,"data":"época 7/10 batch 49/332  loss=1.4107  transcurrido 85.0 min  restante ~53.3 min\r\n"}
+,{"stream_name":"stdout","time":6026.083543354,"data":"época 7/10 batch 65/332  loss=1.4251  transcurrido 85.4 min  restante ~52.4 min\r\n"}
+,{"stream_name":"stdout","time":6047.749179156,"data":"época 7/10 batch 81/332  loss=1.4144  transcurrido 85.7 min  restante ~51.6 min\r\n"}
+,{"stream_name":"stdout","time":6070.350456652,"data":"época 7/10 batch 97/332  loss=1.4013  transcurrido 86.1 min  restante ~50.7 min\r\n"}
+,{"stream_name":"stdout","time":6092.884533721,"data":"época 7/10 batch 113/332  loss=1.4403  transcurrido 86.5 min  restante ~49.9 min\r\n"}
+,{"stream_name":"stdout","time":6115.59902881,"data":"época 7/10 batch 129/332  loss=1.4122  transcurrido 86.9 min  restante ~49.1 min\r\n"}
+,{"stream_name":"stdout","time":6139.332962403,"data":"época 7/10 batch 145/332  loss=1.4708  transcurrido 87.3 min  restante ~48.3 min\r\n"}
+,{"stream_name":"stdout","time":6163.478438995,"data":"época 7/10 batch 161/332  loss=1.4539  transcurrido 87.7 min  restante ~47.5 min\r\n"}
+,{"stream_name":"stdout","time":6186.684832351,"data":"época 7/10 batch 177/332  loss=1.4252  transcurrido 88.0 min  restante ~46.7 min\r\n"}
+,{"stream_name":"stdout","time":6210.94604423,"data":"época 7/10 batch 193/332  loss=1.3833  transcurrido 88.4 min  restante ~45.9 min\r\n"}
+,{"stream_name":"stdout","time":6235.919867928,"data":"época 7/10 batch 209/332  loss=1.3967  transcurrido 88.9 min  restante ~45.2 min\r\n"}
+,{"stream_name":"stdout","time":6260.067093277,"data":"época 7/10 batch 225/332  loss=1.4858  transcurrido 89.3 min  restante ~44.4 min\r\n"}
+,{"stream_name":"stdout","time":6287.470229732,"data":"época 7/10 batch 241/332  loss=1.4390  transcurrido 89.7 min  restante ~43.7 min\r\n"}
+,{"stream_name":"stdout","time":6312.907444005,"data":"época 7/10 batch 257/332  loss=1.4448  transcurrido 90.1 min  restante ~42.9 min\r\n"}
+,{"stream_name":"stdout","time":6339.397139268,"data":"época 7/10 batch 273/332  loss=1.4417  transcurrido 90.6 min  restante ~42.2 min\r\n"}
+,{"stream_name":"stdout","time":6366.512137364,"data":"época 7/10 batch 289/332  loss=1.3988  transcurrido 91.0 min  restante ~41.5 min\r\n"}
+,{"stream_name":"stdout","time":6394.788757188,"data":"época 7/10 batch 305/332  loss=1.4145  transcurrido 91.5 min  restante ~40.8 min\r\n"}
+,{"stream_name":"stdout","time":6424.695071665,"data":"época 7/10 batch 321/332  loss=1.4291  transcurrido 92.0 min  restante ~40.1 min\r\n"}
+,{"stream_name":"stdout","time":6443.787704543,"data":"época 7/10 batch 332/332  loss=1.4654  transcurrido 92.3 min  restante ~39.6 min\r\n"}
+,{"stream_name":"stdout","time":6704.181148421,"data":"  [época 7] valid GLOBAL WP=0.6824 (t0=0.6792, t1=0.6857)   [por secuencia: 0.6384]  (260s)\r\n"}
+,{"stream_name":"stdout","time":6822.749386848,"data":"época 8: lr=2.39e-04\r\n"}
+,{"stream_name":"stdout","time":6826.347799088,"data":"época 8/10 batch 1/332  loss=1.2152  transcurrido 98.7 min  restante ~42.2 min\r\n"}
+,{"stream_name":"stdout","time":6847.567511312,"data":"época 8/10 batch 17/332  loss=1.4583  transcurrido 99.1 min  restante ~41.4 min\r\n"}
+,{"stream_name":"stdout","time":6869.13260761,"data":"época 8/10 batch 33/332  loss=1.3981  transcurrido 99.4 min  restante ~40.6 min\r\n"}
+,{"stream_name":"stdout","time":6890.223490173,"data":"época 8/10 batch 49/332  loss=1.3829  transcurrido 99.8 min  restante ~39.8 min\r\n"}
+,{"stream_name":"stdout","time":6911.366610916,"data":"época 8/10 batch 65/332  loss=1.4294  transcurrido 100.1 min  restante ~39.0 min\r\n"}
+,{"stream_name":"stdout","time":6932.362079058,"data":"época 8/10 batch 81/332  loss=1.3889  transcurrido 100.5 min  restante ~38.2 min\r\n"}
+,{"stream_name":"stdout","time":6953.251093183,"data":"época 8/10 batch 97/332  loss=1.4169  transcurrido 100.8 min  restante ~37.4 min\r\n"}
+,{"stream_name":"stdout","time":6974.636132246,"data":"época 8/10 batch 113/332  loss=1.4423  transcurrido 101.2 min  restante ~36.7 min\r\n"}
+,{"stream_name":"stdout","time":6995.914230159,"data":"época 8/10 batch 129/332  loss=1.4040  transcurrido 101.5 min  restante ~35.9 min\r\n"}
+,{"stream_name":"stdout","time":7017.473636699,"data":"época 8/10 batch 145/332  loss=1.4301  transcurrido 101.9 min  restante ~35.1 min\r\n"}
+,{"stream_name":"stdout","time":7039.983351104,"data":"época 8/10 batch 161/332  loss=1.4245  transcurrido 102.3 min  restante ~34.4 min\r\n"}
+,{"stream_name":"stdout","time":7063.518239258,"data":"época 8/10 batch 177/332  loss=1.3868  transcurrido 102.7 min  restante ~33.6 min\r\n"}
+,{"stream_name":"stdout","time":7086.843383832,"data":"época 8/10 batch 193/332  loss=1.3709  transcurrido 103.0 min  restante ~32.9 min\r\n"}
+,{"stream_name":"stdout","time":7109.163476644,"data":"época 8/10 batch 209/332  loss=1.4295  transcurrido 103.4 min  restante ~32.1 min\r\n"}
+,{"stream_name":"stdout","time":7132.087043578,"data":"época 8/10 batch 225/332  loss=1.4193  transcurrido 103.8 min  restante ~31.4 min\r\n"}
+,{"stream_name":"stdout","time":7155.728136446,"data":"época 8/10 batch 241/332  loss=1.4578  transcurrido 104.2 min  restante ~30.7 min\r\n"}
+,{"stream_name":"stdout","time":7178.692346314,"data":"época 8/10 batch 257/332  loss=1.4028  transcurrido 104.6 min  restante ~29.9 min\r\n"}
+,{"stream_name":"stdout","time":7202.105511432,"data":"época 8/10 batch 273/332  loss=1.4181  transcurrido 105.0 min  restante ~29.2 min\r\n"}
+,{"stream_name":"stdout","time":7226.03631896,"data":"época 8/10 batch 289/332  loss=1.3827  transcurrido 105.4 min  restante ~28.5 min\r\n"}
+,{"stream_name":"stdout","time":7248.85572666,"data":"época 8/10 batch 305/332  loss=1.4174  transcurrido 105.7 min  restante ~27.8 min\r\n"}
+,{"stream_name":"stdout","time":7272.492443561,"data":"época 8/10 batch 321/332  loss=1.4091  transcurrido 106.1 min  restante ~27.1 min\r\n"}
+,{"stream_name":"stdout","time":7288.124475352,"data":"época 8/10 batch 332/332  loss=1.3930  transcurrido 106.4 min  restante ~26.6 min\r\n"}
+,{"stream_name":"stdout","time":7396.895091035,"data":"  [época 8] valid GLOBAL WP=0.6836 (t0=0.6801, t1=0.6871)   [por secuencia: 0.6385]  (109s)\r\n"}
+,{"stream_name":"stdout","time":7508.987413278,"data":"época 9: lr=2.15e-04\r\n"}
+,{"stream_name":"stdout","time":7512.137847022,"data":"época 9/10 batch 1/332  loss=1.3072  transcurrido 110.1 min  restante ~27.5 min\r\n"}
+,{"stream_name":"stdout","time":7533.440937093,"data":"época 9/10 batch 17/332  loss=1.3863  transcurrido 110.5 min  restante ~26.7 min\r\n"}
+,{"stream_name":"stdout","time":7554.943468744,"data":"época 9/10 batch 33/332  loss=1.3733  transcurrido 110.8 min  restante ~26.0 min\r\n"}
+,{"stream_name":"stdout","time":7576.137854959,"data":"época 9/10 batch 49/332  loss=1.4283  transcurrido 111.2 min  restante ~25.3 min\r\n"}
+,{"stream_name":"stdout","time":7597.263481888,"data":"época 9/10 batch 65/332  loss=1.3762  transcurrido 111.6 min  restante ~24.6 min\r\n"}
+,{"stream_name":"stdout","time":7618.461878166,"data":"época 9/10 batch 81/332  loss=1.3799  transcurrido 111.9 min  restante ~23.8 min\r\n"}
+,{"stream_name":"stdout","time":7639.648483448,"data":"época 9/10 batch 97/332  loss=1.4139  transcurrido 112.3 min  restante ~23.1 min\r\n"}
+,{"stream_name":"stdout","time":7660.58161268,"data":"época 9/10 batch 113/332  loss=1.3956  transcurrido 112.6 min  restante ~22.4 min\r\n"}
+,{"stream_name":"stdout","time":7682.178073112,"data":"época 9/10 batch 129/332  loss=1.4139  transcurrido 113.0 min  restante ~21.7 min\r\n"}
+,{"stream_name":"stdout","time":7703.070129928,"data":"época 9/10 batch 145/332  loss=1.3902  transcurrido 113.3 min  restante ~21.0 min\r\n"}
+,{"stream_name":"stdout","time":7724.601828767,"data":"época 9/10 batch 161/332  loss=1.4000  transcurrido 113.7 min  restante ~20.3 min\r\n"}
+,{"stream_name":"stdout","time":7746.296784753,"data":"época 9/10 batch 177/332  loss=1.4219  transcurrido 114.0 min  restante ~19.6 min\r\n"}
+,{"stream_name":"stdout","time":7768.816712526,"data":"época 9/10 batch 193/332  loss=1.4521  transcurrido 114.4 min  restante ~18.9 min\r\n"}
+,{"stream_name":"stdout","time":7791.896098959,"data":"época 9/10 batch 209/332  loss=1.4132  transcurrido 114.8 min  restante ~18.2 min\r\n"}
+,{"stream_name":"stdout","time":7814.749145956,"data":"época 9/10 batch 225/332  loss=1.4023  transcurrido 115.2 min  restante ~17.6 min\r\n"}
+,{"stream_name":"stdout","time":7839.253283051,"data":"época 9/10 batch 241/332  loss=1.4301  transcurrido 115.6 min  restante ~16.9 min\r\n"}
+,{"stream_name":"stdout","time":7863.27273098,"data":"época 9/10 batch 257/332  loss=1.3947  transcurrido 116.0 min  restante ~16.2 min\r\n"}
+,{"stream_name":"stdout","time":7886.770033376,"data":"época 9/10 batch 273/332  loss=1.4444  transcurrido 116.4 min  restante ~15.5 min\r\n"}
+,{"stream_name":"stdout","time":7911.664049643,"data":"época 9/10 batch 289/332  loss=1.4277  transcurrido 116.8 min  restante ~14.9 min\r\n"}
+,{"stream_name":"stdout","time":7934.995986605,"data":"época 9/10 batch 305/332  loss=1.3849  transcurrido 117.2 min  restante ~14.2 min\r\n"}
+,{"stream_name":"stdout","time":7960.409267118,"data":"época 9/10 batch 321/332  loss=1.4397  transcurrido 117.6 min  restante ~13.6 min\r\n"}
+,{"stream_name":"stdout","time":7975.986408426,"data":"época 9/10 batch 332/332  loss=1.3285  transcurrido 117.9 min  restante ~13.1 min\r\n"}
+,{"stream_name":"stdout","time":8079.867960751,"data":"  [época 9] valid GLOBAL WP=0.6840 (t0=0.6805, t1=0.6876)   [por secuencia: 0.6385]  (104s)\r\n"}
+,{"stream_name":"stdout","time":8190.412458983,"data":"época 10: lr=1.94e-04\r\n"}
+,{"stream_name":"stdout","time":8193.816280662,"data":"época 10/10 batch 1/332  loss=1.5844  transcurrido 121.5 min  restante ~13.5 min\r\n"}
+,{"stream_name":"stdout","time":8215.086315137,"data":"época 10/10 batch 17/332  loss=1.4020  transcurrido 121.8 min  restante ~12.8 min\r\n"}
+,{"stream_name":"stdout","time":8236.538463767,"data":"época 10/10 batch 33/332  loss=1.3638  transcurrido 122.2 min  restante ~12.1 min\r\n"}
+,{"stream_name":"stdout","time":8257.578432527,"data":"época 10/10 batch 49/332  loss=1.4156  transcurrido 122.6 min  restante ~11.4 min\r\n"}
+,{"stream_name":"stdout","time":8278.873302304,"data":"época 10/10 batch 65/332  loss=1.3908  transcurrido 122.9 min  restante ~10.7 min\r\n"}
+,{"stream_name":"stdout","time":8299.769319932,"data":"época 10/10 batch 81/332  loss=1.3628  transcurrido 123.3 min  restante ~10.1 min\r\n"}
+,{"stream_name":"stdout","time":8321.078471594,"data":"época 10/10 batch 97/332  loss=1.3787  transcurrido 123.6 min  restante ~9.4 min\r\n"}
+,{"stream_name":"stdout","time":8342.338105773,"data":"época 10/10 batch 113/332  loss=1.4053  transcurrido 124.0 min  restante ~8.8 min\r\n"}
+,{"stream_name":"stdout","time":8363.469132517,"data":"época 10/10 batch 129/332  loss=1.3724  transcurrido 124.3 min  restante ~8.1 min\r\n"}
+,{"stream_name":"stdout","time":8384.921942664,"data":"época 10/10 batch 145/332  loss=1.4169  transcurrido 124.7 min  restante ~7.4 min\r\n"}
+,{"stream_name":"stdout","time":8406.422829063,"data":"época 10/10 batch 161/332  loss=1.4119  transcurrido 125.0 min  restante ~6.8 min\r\n"}
+,{"stream_name":"stdout","time":8427.685492368,"data":"época 10/10 batch 177/332  loss=1.4070  transcurrido 125.4 min  restante ~6.1 min\r\n"}
+,{"stream_name":"stdout","time":8448.768574129,"data":"época 10/10 batch 193/332  loss=1.3994  transcurrido 125.7 min  restante ~5.5 min\r\n"}
+,{"stream_name":"stdout","time":8470.007716533,"data":"época 10/10 batch 209/332  loss=1.4196  transcurrido 126.1 min  restante ~4.9 min\r\n"}
+,{"stream_name":"stdout","time":8490.95059976,"data":"época 10/10 batch 225/332  loss=1.3951  transcurrido 126.4 min  restante ~4.2 min\r\n"}
+,{"stream_name":"stdout","time":8512.160194616,"data":"época 10/10 batch 241/332  loss=1.3889  transcurrido 126.8 min  restante ~3.6 min\r\n"}
+,{"stream_name":"stdout","time":8533.262864754,"data":"época 10/10 batch 257/332  loss=1.3917  transcurrido 127.2 min  restante ~2.9 min\r\n"}
+,{"stream_name":"stdout","time":8554.083109677,"data":"época 10/10 batch 273/332  loss=1.3983  transcurrido 127.5 min  restante ~2.3 min\r\n"}
+,{"stream_name":"stdout","time":8575.175088375,"data":"época 10/10 batch 289/332  loss=1.4239  transcurrido 127.9 min  restante ~1.7 min\r\n"}
+,{"stream_name":"stdout","time":8596.276272582,"data":"época 10/10 batch 305/332  loss=1.3957  transcurrido 128.2 min  restante ~1.1 min\r\n"}
+,{"stream_name":"stdout","time":8617.403503402,"data":"época 10/10 batch 321/332  loss=1.3781  transcurrido 128.6 min  restante ~0.4 min\r\n"}
+,{"stream_name":"stdout","time":8631.151385548,"data":"época 10/10 batch 332/332  loss=1.3660  transcurrido 128.8 min  restante ~0.0 min\r\n"}
+,{"stream_name":"stdout","time":8863.092422006,"data":"  [época 10] valid GLOBAL WP=0.6823 (t0=0.6790, t1=0.6856)   [por secuencia: 0.6375]  (232s)\r\n"}
+,{"stream_name":"stdout","time":8968.311260676,"data":"  [SWA épocas 7-10 (4 modelos)] valid GLOBAL WP=0.6840 (t0=0.6807, t1=0.6874)\r\n"}
+,{"stream_name":"stdout","time":9080.515934626,"data":"Mejor valid WP: 0.6840   Resultados en /kaggle/working/results/student_mask\r\n"}
+,{"stream_name":"stdout","time":9086.548831709,"data":"mejor 0.684 | SWA 0.684\n"}
+,{"stream_name":"stdout","time":9086.548863847,"data":"curva por epoca: 0.6751 / 0.6795 / 0.6815 / 0.6816 / 0.6821 / 0.6820 / 0.6824 / 0.6836 / 0.6840 / 0.6823\n"}
+,{"stream_name":"stdout","time":9086.548870639,"data":"referencia EXACTA: alumna LR, misma receta sin pesar = 0.6834\n"}
+,{"stream_name":"stdout","time":9086.548876094,"data":"['best_by_rowgroup.csv', 'best_model.pt', 'checkpoint.pt', 'last_model.pt', 'metrics.json', 'run_config.json', 'swa_model.pt', 'valid_preds_best.npz', 'valid_preds_swa.npz']\n"}
+,{"stream_name":"stderr","time":9090.721560968,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":9090.721598115,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":9091.107456969,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":9091.107483242,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":9092.348542991,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":9092.476097868,"data":"[NbConvertApp] Writing 115385 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":9095.151842052,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":9096.215328245,"data":"[NbConvertApp] Writing 681053 bytes to __results__.html\n"}
+]

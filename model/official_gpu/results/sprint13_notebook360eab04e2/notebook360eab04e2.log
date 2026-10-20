@@ -1,0 +1,40 @@
+[{"stream_name":"stderr","time":7.305326275,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":7.305384804,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":7.305391767,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":7.305396731,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":8.021720082,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.02175766,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.021764141,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.021769188,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":12.731669431,"data":"Traceback (most recent call last):\n"}
+,{"stream_name":"stderr","time":12.732394855999999,"data":"  File \"\u003cstring\u003e\", line 1, in \u003cmodule\u003e\n"}
+,{"stream_name":"stderr","time":12.732406947,"data":"    import sys;import papermill as pm;pm.execute_notebook(\"__notebook__.ipynb\",\"__notebook__.ipynb\",progress_bar=False,log_output=True,stdout_file=sys.stdout,stderr_file=sys.stderr,allow_errors=False,timeout=43200)\n"}
+,{"stream_name":"stderr","time":12.73241516,"data":"                                      ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n"}
+,{"stream_name":"stderr","time":12.732420571,"data":"  File \"/usr/local/lib/python3.13/dist-packages/papermill/execute.py\", line 131, in execute_notebook\n"}
+,{"stream_name":"stderr","time":12.73242551,"data":"    raise_for_execution_errors(nb, output_path)\n"}
+,{"stream_name":"stderr","time":12.732429935,"data":"    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n"}
+,{"stream_name":"stderr","time":12.732434597,"data":"  File \"/usr/local/lib/python3.13/dist-packages/papermill/execute.py\", line 251, in raise_for_execution_errors\n"}
+,{"stream_name":"stderr","time":12.73243937,"data":"    raise error\n"}
+,{"stream_name":"stderr","time":12.732473538,"data":"papermill.exceptions.PapermillExecutionError: \n"}
+,{"stream_name":"stderr","time":12.73249191,"data":"---------------------------------------------------------------------------\n"}
+,{"stream_name":"stderr","time":12.732497603,"data":"Exception encountered at \"In [1]\":\n"}
+,{"stream_name":"stderr","time":12.732502278,"data":"---------------------------------------------------------------------------\n"}
+,{"stream_name":"stderr","time":12.73250715,"data":"AssertionError                            Traceback (most recent call last)\n"}
+,{"stream_name":"stderr","time":12.732511265,"data":"/tmp/ipykernel_16/142608009.py in \u003ccell line: 0\u003e()\n"}
+,{"stream_name":"stderr","time":12.732521017,"data":"      1 import os, torch\n"}
+,{"stream_name":"stderr","time":12.732525675,"data":"----\u003e 2 assert torch.cuda.is_available(), 'Activá GPU'\n"}
+,{"stream_name":"stderr","time":12.732531477,"data":"      3 print('GPU:', torch.cuda.get_device_name(0), '| torch', torch.__version__)\n"}
+,{"stream_name":"stderr","time":12.73253674,"data":"      4 for p in ['/kaggle/input/datasets/joaquinfiorina/connectome-train-part1/train_part1.parquet', '/kaggle/input/datasets/joaquinfiorina/connectome-train-part2/train_part2.parquet'] + ['/kaggle/input/datasets/joaquinfiorina/connectome-valid/valid.parquet']:\n"}
+,{"stream_name":"stderr","time":12.732555003,"data":"      5     assert os.path.isfile(p), f'Falta input: {p}'\n"}
+,{"stream_name":"stderr","time":12.732560607,"data":"\n"}
+,{"stream_name":"stderr","time":12.732565423,"data":"AssertionError: Activá GPU\n"}
+,{"stream_name":"stderr","time":12.73257044,"data":"\n"}
+,{"stream_name":"stderr","time":15.434767943,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":15.434819223,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":15.621962848999999,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":15.621990703,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":16.497767141,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":16.599318302,"data":"[NbConvertApp] Writing 77557 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":19.679108107,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":20.53039802,"data":"[NbConvertApp] Writing 608364 bytes to __results__.html\n"}
+]

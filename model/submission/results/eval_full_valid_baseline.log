@@ -1,0 +1,21 @@
+100/1873 seqs (1.0 min, ~17.3 min restantes)   baseline: G=0.6109
+200/1873 seqs (1.9 min, ~16.2 min restantes)   baseline: G=0.6242
+300/1873 seqs (2.9 min, ~15.0 min restantes)   baseline: G=0.6246
+400/1873 seqs (3.8 min, ~13.9 min restantes)   baseline: G=0.6306
+500/1873 seqs (4.8 min, ~13.2 min restantes)   baseline: G=0.6313
+600/1873 seqs (5.7 min, ~12.1 min restantes)   baseline: G=0.6238
+700/1873 seqs (29.8 min, ~50.0 min restantes)   baseline: G=0.6213
+800/1873 seqs (31.2 min, ~41.9 min restantes)   baseline: G=0.6203
+900/1873 seqs (129.8 min, ~140.4 min restantes)   baseline: G=0.6204
+1000/1873 seqs (130.9 min, ~114.3 min restantes)   baseline: G=0.6190
+1100/1873 seqs (132.4 min, ~93.0 min restantes)   baseline: G=0.6162
+1200/1873 seqs (133.8 min, ~75.0 min restantes)   baseline: G=0.6150
+1300/1873 seqs (139.7 min, ~61.6 min restantes)   baseline: G=0.6163
+1400/1873 seqs (141.1 min, ~47.7 min restantes)   baseline: G=0.6178
+1500/1873 seqs (142.6 min, ~35.4 min restantes)   baseline: G=0.6153
+1600/1873 seqs (144.0 min, ~24.6 min restantes)   baseline: G=0.6162
+1700/1873 seqs (145.4 min, ~14.8 min restantes)   baseline: G=0.6153
+1800/1873 seqs (171.0 min, ~6.9 min restantes)   baseline: G=0.6160
+1873/1873 seqs (172.0 min, ~0.0 min restantes)   baseline: G=0.6171
+
+baseline: GLOBAL WP=0.6171 (t0=0.5879, t1=0.6462)   por secuencia=0.5896  [1873 seqs]

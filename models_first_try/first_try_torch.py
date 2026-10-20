@@ -26,7 +26,8 @@ def run_torch_models(names: list[str], folder: Path) -> None:
     except ImportError:
         parser.error("Falta PyTorch. Instala: python -m pip install torch")
 
-    torch.set_num_threads(1)
+    import os
+    torch.set_num_threads(max(1, (os.cpu_count() or 2) - 2))  # dejar 2 hilos libres para el sistema
     train = pq.ParquetFile(TRAIN_PATH)
     valid = pq.ParquetFile(VALID_PATH)
     train_groups, valid_groups, run_dir = prepare_run(folder, args, train, valid)
@@ -69,7 +70,12 @@ def run_torch_models(names: list[str], folder: Path) -> None:
         torch.manual_seed(args.seed)
         model = CausalTCN() if name == "TCN" else RecurrentModel(name)
         optimizer = torch.optim.Adam(model.parameters())
-        loss_fn = nn.MSELoss()
+        def loss_fn(pred, target):
+            # Alineada con la métrica del challenge: targets recortados a [-2, 2]
+            # y cada fila pesa |target| (las filas con target ~0 no cuentan).
+            y = target.clamp(-2.0, 2.0)
+            w = y.abs()
+            return (w * (pred - y) ** 2).sum() / w.sum().clamp_min(1e-8)
         chunks_per_group = (SEQUENCE_LENGTH + 127) // 128
         total_chunks = args.epochs * len(train_groups) * chunks_per_group
         progress = FitProgress(name, total_chunks, every=chunks_per_group)
@@ -121,7 +127,7 @@ def run_torch_models(names: list[str], folder: Path) -> None:
         metrics, by_group = evaluate(predict_group, train, valid, train_groups, valid_groups)
         metrics["model"] = name
         metrics["training"] = {
-            "epochs": args.epochs, "optimizer": "Adam defaults", "loss": "MSE",
+            "epochs": args.epochs, "optimizer": "Adam defaults", "loss": "weighted MSE (clip ±2, w=|y|)",
             "hidden_or_channels": 64, "train_rows_per_group": SEQUENCE_LENGTH,
             "normalizer_sample_rows": len(x_sample),
             "truncated_bptt_chunk": 128 if name != "TCN" else None,

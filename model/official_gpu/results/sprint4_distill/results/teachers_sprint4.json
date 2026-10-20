@@ -1,0 +1,20 @@
+{
+  "chosen": {
+    "x1": "/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128x2_x1_seed2041_swa.pt",
+    "x2": "/kaggle/input/datasets/joaquinfiorina/connectome-models/gru200x1_x2_seed2042_swa.pt",
+    "x3": "/kaggle/input/datasets/joaquinfiorina/connectome-models/gru64x3_x3_seed2043_swa.pt",
+    "y1": "/kaggle/input/datasets/joaquinfiorina/connectome-models/gru160x2_y1_seed2044_swa.pt",
+    "y2": "/kaggle/input/datasets/joaquinfiorina/connectome-models/lstm128x2_y2_seed2045_swa.pt",
+    "y3": "/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128x2d2_y3_seed2046_swa.pt",
+    "Eswa": "/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128_distill_seed2029_swa.pt",
+    "Dswa": "/kaggle/input/datasets/joaquinfiorina/connectome-models/gru192_seed2027_swa.pt",
+    "Gswa": "/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128_gwp_seed2031_swa.pt",
+    "Cswa": "/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128_drop_seed2028_swa.pt",
+    "B": "/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128_santiago_base.pt"
+  },
+  "teachers": {
+    "X": "/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128x2_x1_seed2041_swa.pt /kaggle/input/datasets/joaquinfiorina/connectome-models/gru200x1_x2_seed2042_swa.pt /kaggle/input/datasets/joaquinfiorina/connectome-models/gru64x3_x3_seed2043_swa.pt",
+    "Y": "/kaggle/input/datasets/joaquinfiorina/connectome-models/gru160x2_y1_seed2044_swa.pt /kaggle/input/datasets/joaquinfiorina/connectome-models/lstm128x2_y2_seed2045_swa.pt /kaggle/input/datasets/joaquinfiorina/connectome-models/gru128x2d2_y3_seed2046_swa.pt",
+    "Z": "/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128x2_x1_seed2041_swa.pt /kaggle/input/datasets/joaquinfiorina/connectome-models/gru200x1_x2_seed2042_swa.pt /kaggle/input/datasets/joaquinfiorina/connectome-models/gru64x3_x3_seed2043_swa.pt /kaggle/input/datasets/joaquinfiorina/connectome-models/gru160x2_y1_seed2044_swa.pt /kaggle/input/datasets/joaquinfiorina/connectome-models/lstm128x2_y2_seed2045_swa.pt /kaggle/input/datasets/joaquinfiorina/connectome-models/gru128x2d2_y3_seed2046_swa.pt /kaggle/input/datasets/joaquinfiorina/connectome-models/gru128_distill_seed2029_swa.pt /kaggle/input/datasets/joaquinfiorina/connectome-models/gru192_seed2027_swa.pt"
+  }
+}

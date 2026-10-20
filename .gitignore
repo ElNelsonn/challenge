@@ -1,0 +1,30 @@
+# Qué NO va al repositorio.
+#
+# Sin este archivo el repo pesa 6,7 GB y tiene 48 archivos de más de 100 MB, que es el límite duro de
+# GitHub por archivo: el push se rechaza entero y no sube nada. Con este archivo quedan ~45 MB.
+
+# --- predicciones guardadas de valid (6,35 GB, 62 archivos, 48 de ellos pasan los 100 MB)
+# Son (1.873 secuencias x 20.000 filas x 2 targets) en float16 por cada modelo. Se regeneran corriendo
+# el entrenador con --save-valid-preds, y solo sirven para comparar ensambles en la laptop.
+*.npz
+
+# --- modelos entrenados (293 MB, 231 archivos)
+# Ninguno pasa los 100 MB, pero son 231 y se regeneran. Los pesos de los modelos que de verdad importan
+# ya están adentro de los .zip de submissions/, que sí van al repo.
+# Si querés conservar alguno en particular, copialo a modelos_finales/ y sacale el ignore con:
+#     !modelos_finales/*.pt
+*.pt
+
+# --- cachés y temporales
+__pycache__/
+*.pyc
+*.nbi
+*.nbc
+.ipynb_checkpoints/
+model/submission/results/valid_scored_cache.npz
+
+# --- datos crudos, por las dudas (viven fuera del repo, en ../datasets/)
+*.parquet
+
+# --- salidas descomprimidas de las submissions (el .zip sí va)
+submissions/*/

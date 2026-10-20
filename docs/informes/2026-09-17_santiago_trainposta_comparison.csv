@@ -1,0 +1,3 @@
+phase,variant,inputs,train_sequences,validation_sequences,best_epoch,wp,t0,t1,elapsed_seconds,peak_gpu_gib,best_model,delta_vs_base,minutes
+full,base,112,10607,1873,6,0.6731364177020469,0.6671708209803318,0.6791020144237622,5912.049591868999,0.34258604049682617,/kaggle/working/temporal_results/full/base/best_model.pt,0.0,98.53415986448333
+full,events,2880,10607,1873,10,0.6716063955938274,0.666643959307519,0.6765688318801358,14412.00224296,1.3754358291625977,/kaggle/working/temporal_results/full/events/best_model.pt,-0.0015300221082195087,240.20003738266666

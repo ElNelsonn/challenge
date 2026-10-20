@@ -1,0 +1,32 @@
+device=cpu  batch=8  chunk=256  torch=2.14.0+cpu
+Normalizador: 100 grupos, 112 entradas (7s)
+GRU h=128 x2  entradas=112  params=192,258
+época 1/2 batch 1/13  loss=1.3883  transcurrido 0.4 min  restante ~8.8 min
+época 1/2 batch 2/13  loss=1.7562  transcurrido 0.7 min  restante ~8.4 min
+época 1/2 batch 3/13  loss=1.3274  transcurrido 1.1 min  restante ~8.1 min
+época 1/2 batch 4/13  loss=1.5461  transcurrido 1.4 min  restante ~7.8 min
+época 1/2 batch 5/13  loss=1.7742  transcurrido 1.8 min  restante ~7.5 min
+época 1/2 batch 6/13  loss=1.3243  transcurrido 2.1 min  restante ~7.1 min
+época 1/2 batch 7/13  loss=1.3101  transcurrido 2.5 min  restante ~6.7 min
+época 1/2 batch 8/13  loss=1.2624  transcurrido 2.8 min  restante ~6.4 min
+época 1/2 batch 9/13  loss=1.3637  transcurrido 3.2 min  restante ~6.0 min
+época 1/2 batch 10/13  loss=1.5397  transcurrido 3.5 min  restante ~5.6 min
+época 1/2 batch 11/13  loss=1.2625  transcurrido 3.8 min  restante ~5.2 min
+época 1/2 batch 12/13  loss=1.1612  transcurrido 4.2 min  restante ~4.9 min
+época 1/2 batch 13/13  loss=1.5318  transcurrido 4.5 min  restante ~4.5 min
+  [época 1] valid WP=0.4770 (t0=0.4653, t1=0.4887)  elegibles=10/10  (5s)
+época 2/2 batch 1/13  loss=1.5509  transcurrido 5.0 min  restante ~4.2 min
+época 2/2 batch 2/13  loss=1.3704  transcurrido 5.3 min  restante ~3.9 min
+época 2/2 batch 3/13  loss=1.3038  transcurrido 5.7 min  restante ~3.5 min
+época 2/2 batch 4/13  loss=1.7475  transcurrido 6.0 min  restante ~3.2 min
+época 2/2 batch 5/13  loss=1.3410  transcurrido 6.3 min  restante ~2.8 min
+época 2/2 batch 6/13  loss=1.3288  transcurrido 6.6 min  restante ~2.4 min
+época 2/2 batch 7/13  loss=1.4340  transcurrido 7.0 min  restante ~2.1 min
+época 2/2 batch 8/13  loss=1.5176  transcurrido 7.3 min  restante ~1.7 min
+época 2/2 batch 9/13  loss=1.0669  transcurrido 7.6 min  restante ~1.4 min
+época 2/2 batch 10/13  loss=1.3395  transcurrido 8.0 min  restante ~1.0 min
+época 2/2 batch 11/13  loss=1.5388  transcurrido 8.3 min  restante ~0.7 min
+época 2/2 batch 12/13  loss=1.3796  transcurrido 8.6 min  restante ~0.3 min
+época 2/2 batch 13/13  loss=1.3962  transcurrido 8.9 min  restante ~0.0 min
+  [época 2] valid WP=0.4902 (t0=0.4780, t1=0.5023)  elegibles=10/10  (5s)
+Mejor valid WP: 0.4902   Resultados en C:\Users\Joaquin\Desktop\UM\semestre 8\Machine learning\proyecto final\wnn_connectome_starterpack\wnn_connectome_starterpack\challenge\model\official_gpu\results\cpu_check_gru128x2_100s_2e

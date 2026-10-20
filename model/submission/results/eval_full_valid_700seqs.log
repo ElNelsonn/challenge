@@ -1,0 +1,7 @@
+100/1873 seqs (63.5 min, ~1125.2 min restantes)   baseline: G=0.6109  gru: G=0.6699
+200/1873 seqs (69.6 min, ~582.0 min restantes)   baseline: G=0.6242  gru: G=0.6816
+300/1873 seqs (75.7 min, ~396.9 min restantes)   baseline: G=0.6246  gru: G=0.6745
+400/1873 seqs (82.0 min, ~301.9 min restantes)   baseline: G=0.6306  gru: G=0.6847
+500/1873 seqs (88.7 min, ~243.5 min restantes)   baseline: G=0.6313  gru: G=0.6871
+600/1873 seqs (95.5 min, ~202.5 min restantes)   baseline: G=0.6238  gru: G=0.6785
+700/1873 seqs (102.1 min, ~171.0 min restantes)   baseline: G=0.6213  gru: G=0.6748

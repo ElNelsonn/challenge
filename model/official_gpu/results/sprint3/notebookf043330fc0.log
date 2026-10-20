@@ -1,0 +1,463 @@
+[{"stream_name":"stderr","time":7.89184641,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":7.891906054,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":7.891913703,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":7.891918166,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":8.579389059,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.579463506,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.579471535,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.579476188,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":15.449619186,"data":"GPU: Tesla T4 | torch 2.10.0+cu128\n"}
+,{"stream_name":"stdout","time":15.449684493,"data":"Inputs OK\n"}
+,{"stream_name":"stdout","time":15.469797596,"data":"Writing utils.py\n"}
+,{"stream_name":"stdout","time":15.500103526,"data":"Writing train_official_gpu_v1.py\n"}
+,{"stream_name":"stdout","time":15.51844692,"data":"Writing eval_ensemble.py\n"}
+,{"stream_name":"stdout","time":18.059151528,"data":"A: GRU h=128 x2  (/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128_exp009_seed2026.pt)\r\n"}
+,{"stream_name":"stdout","time":18.059221784,"data":"B: GRU h=128 x2  (/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128_santiago_base.pt)\r\n"}
+,{"stream_name":"stdout","time":18.110676026,"data":"Cswa: GRU h=128 x2  (/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128_drop_seed2028_swa.pt)\r\n"}
+,{"stream_name":"stdout","time":18.161692296,"data":"Dswa: GRU h=192 x2  (/kaggle/input/datasets/joaquinfiorina/connectome-models/gru192_seed2027_swa.pt)\r\n"}
+,{"stream_name":"stdout","time":18.161751989,"data":"E: GRU h=128 x2  (/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128_distill_seed2029_best.pt)\r\n"}
+,{"stream_name":"stdout","time":18.212577488,"data":"Eswa: GRU h=128 x2  (/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128_distill_seed2029_swa.pt)\r\n"}
+,{"stream_name":"stdout","time":18.212633397,"data":"F: GRU h=128 x2  (/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128_cosine_seed2030_best.pt)\r\n"}
+,{"stream_name":"stdout","time":18.263945325,"data":"Gswa: GRU h=128 x2  (/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128_gwp_seed2031_swa.pt)\r\n"}
+,{"stream_name":"stdout","time":58.615839126,"data":"  160/1873 seqs (0.7 min)\r\n"}
+,{"stream_name":"stdout","time":96.861550114,"data":"  320/1873 seqs (1.3 min)\r\n"}
+,{"stream_name":"stdout","time":135.42123074,"data":"  480/1873 seqs (1.9 min)\r\n"}
+,{"stream_name":"stdout","time":173.355932661,"data":"  640/1873 seqs (2.6 min)\r\n"}
+,{"stream_name":"stdout","time":211.184602626,"data":"  800/1873 seqs (3.2 min)\r\n"}
+,{"stream_name":"stdout","time":248.836180918,"data":"  960/1873 seqs (3.8 min)\r\n"}
+,{"stream_name":"stdout","time":286.28845739,"data":"  1120/1873 seqs (4.5 min)\r\n"}
+,{"stream_name":"stdout","time":323.466794716,"data":"  1280/1873 seqs (5.1 min)\r\n"}
+,{"stream_name":"stdout","time":359.905573298,"data":"  1440/1873 seqs (5.7 min)\r\n"}
+,{"stream_name":"stdout","time":397.70237775,"data":"  1600/1873 seqs (6.3 min)\r\n"}
+,{"stream_name":"stdout","time":435.636501763,"data":"  1760/1873 seqs (6.9 min)\r\n"}
+,{"stream_name":"stdout","time":463.088159529,"data":"  1873/1873 seqs (7.4 min)\r\n"}
+,{"stream_name":"stdout","time":463.088210175,"data":"\r\n"}
+,{"stream_name":"stdout","time":463.088215373,"data":"modelos                       GLOBAL WP       t0       t1  us/fila  entra\r\n"}
+,{"stream_name":"stdout","time":463.088219451,"data":"Dswa+Eswa+F+Gswa                 0.6829   0.6784   0.6874     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088223282,"data":"B+Dswa+Eswa+Gswa                 0.6828   0.6784   0.6873     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088227062,"data":"Dswa+E+F+Gswa                    0.6828   0.6784   0.6872     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088231166,"data":"Cswa+Dswa+Eswa+Gswa              0.6828   0.6782   0.6873     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.08823518,"data":"B+Dswa+E+Gswa                    0.6828   0.6784   0.6871     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088238742,"data":"Dswa+E+Eswa+Gswa                 0.6827   0.6783   0.6872     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088242314,"data":"Cswa+Dswa+Eswa+F                 0.6827   0.6782   0.6872     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088245939,"data":"Cswa+Dswa+E+Gswa                 0.6827   0.6783   0.6871     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.08824952,"data":"B+Cswa+Dswa+Eswa                 0.6827   0.6782   0.6871     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088253076,"data":"A+Dswa+Eswa+Gswa                 0.6826   0.6785   0.6868     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088256782,"data":"B+Dswa+Eswa+F                    0.6826   0.6781   0.6871     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088260517,"data":"Dswa+E+Eswa+F                    0.6826   0.6781   0.6871     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088264098,"data":"Cswa+Dswa+E+F                    0.6826   0.6781   0.6871     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088267715,"data":"B+Cswa+Dswa+E                    0.6826   0.6781   0.6870     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088271293,"data":"B+Dswa+E+Eswa                    0.6825   0.6781   0.6869     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.08827491,"data":"B+Dswa+E+F                       0.6825   0.6781   0.6869     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088278493,"data":"Cswa+Dswa+E+Eswa                 0.6825   0.6781   0.6870     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088282049,"data":"Cswa+Eswa+F+Gswa                 0.6825   0.6779   0.6871     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088286307,"data":"Dswa+Eswa+Gswa                   0.6825   0.6779   0.6870     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088290053,"data":"A+Dswa+E+Gswa                    0.6825   0.6784   0.6865     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088293646,"data":"E+Eswa+F+Gswa                    0.6825   0.6779   0.6870     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088297237,"data":"B+Cswa+Eswa+Gswa                 0.6825   0.6779   0.6870     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.08830082,"data":"B+Eswa+F+Gswa                    0.6824   0.6779   0.6870     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088304473,"data":"Cswa+Dswa+F+Gswa                 0.6824   0.6779   0.6869     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088308041,"data":"B+Cswa+Dswa+Gswa                 0.6824   0.6780   0.6869     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088311611,"data":"Cswa+E+F+Gswa                    0.6824   0.6779   0.6870     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088316939,"data":"A+Dswa+Eswa+F                    0.6824   0.6781   0.6868     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088331599,"data":"B+Dswa+F+Gswa                    0.6824   0.6780   0.6868     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.08833457,"data":"A+Cswa+Dswa+Eswa                 0.6824   0.6781   0.6867     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088337321,"data":"B+E+Eswa+Gswa                    0.6824   0.6779   0.6869     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088340073,"data":"B+E+F+Gswa                       0.6824   0.6779   0.6868     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088342799,"data":"B+Cswa+E+Gswa                    0.6824   0.6779   0.6869     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088345516,"data":"Cswa+E+Eswa+Gswa                 0.6824   0.6778   0.6869     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088348238,"data":"Dswa+Eswa+F                      0.6824   0.6778   0.6869     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088350967,"data":"A+Eswa+F+Gswa                    0.6823   0.6780   0.6866     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088353719,"data":"Cswa+Dswa+Eswa                   0.6823   0.6778   0.6868     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088356419,"data":"Dswa+E+Gswa                      0.6823   0.6780   0.6866     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088359136,"data":"A+Cswa+Eswa+Gswa                 0.6823   0.6780   0.6866     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088361855,"data":"B+Dswa+Eswa                      0.6823   0.6779   0.6867     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088364562,"data":"A+B+Dswa+Eswa                    0.6823   0.6780   0.6866     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.08836727,"data":"A+Dswa+E+Eswa                    0.6823   0.6780   0.6865     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.08836997,"data":"A+Dswa+E+F                       0.6823   0.6780   0.6865     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088372747,"data":"A+Dswa+F+Gswa                    0.6822   0.6781   0.6863     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088375502,"data":"A+Cswa+Dswa+E                    0.6822   0.6780   0.6865     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088378199,"data":"Cswa+E+Eswa+F                    0.6822   0.6776   0.6869     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088380959,"data":"A+E+Eswa+Gswa                    0.6822   0.6780   0.6864     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088383756,"data":"B+Cswa+Dswa+F                    0.6822   0.6777   0.6867     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088386476,"data":"A+B+Eswa+Gswa                    0.6822   0.6779   0.6865     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088389177,"data":"A+Cswa+Dswa+Gswa                 0.6822   0.6780   0.6863     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088391896,"data":"A+E+F+Gswa                       0.6822   0.6780   0.6864     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088394682,"data":"Dswa+E+F                         0.6822   0.6778   0.6866     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088397429,"data":"B+Cswa+Eswa+F                    0.6822   0.6775   0.6868     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088400252,"data":"Cswa+Dswa+E                      0.6821   0.6777   0.6865     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088402964,"data":"A+Cswa+E+Gswa                    0.6821   0.6779   0.6864     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088405796,"data":"A+B+Dswa+Gswa                    0.6821   0.6780   0.6862     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088411979,"data":"B+Cswa+E+Eswa                    0.6821   0.6776   0.6867     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.08841488,"data":"Eswa+F+Gswa                      0.6821   0.6775   0.6868     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088417592,"data":"B+Dswa+E                         0.6821   0.6778   0.6864     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088420628,"data":"B+Cswa+E+F                       0.6821   0.6775   0.6867     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088423397,"data":"A+B+Dswa+E                       0.6821   0.6779   0.6864     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088426159,"data":"B+E+Eswa+F                       0.6821   0.6775   0.6867     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088429136,"data":"Cswa+Eswa+Gswa                   0.6820   0.6774   0.6867     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.08843183,"data":"Dswa+E+Eswa                      0.6820   0.6776   0.6865     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088434539,"data":"B+Eswa+Gswa                      0.6820   0.6775   0.6866     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088437244,"data":"A+B+E+Gswa                       0.6820   0.6779   0.6862     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088440016,"data":"A+Cswa+Eswa+F                    0.6820   0.6775   0.6866     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088442719,"data":"B+Cswa+F+Gswa                    0.6820   0.6774   0.6866     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088445459,"data":"E+F+Gswa                         0.6820   0.6775   0.6865     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.08844816,"data":"A+Cswa+Dswa+F                    0.6820   0.6776   0.6863     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088450956,"data":"A+E+Eswa+F                       0.6819   0.6775   0.6864     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088453661,"data":"B+E+Gswa                         0.6819   0.6775   0.6863     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088456352,"data":"A+Cswa+E+Eswa                    0.6819   0.6774   0.6863     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088459056,"data":"Cswa+E+Gswa                      0.6819   0.6773   0.6864     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088461828,"data":"E+Eswa+Gswa                      0.6819   0.6773   0.6864     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088464532,"data":"A+Cswa+E+F                       0.6819   0.6774   0.6863     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088467266,"data":"A+Cswa+F+Gswa                    0.6819   0.6776   0.6862     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088469976,"data":"A+B+Cswa+Eswa                    0.6819   0.6774   0.6864     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088472754,"data":"A+Dswa+Eswa                      0.6819   0.6776   0.6861     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088475452,"data":"Dswa+F+Gswa                      0.6819   0.6774   0.6863     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088478146,"data":"B+Dswa+Gswa                      0.6819   0.6775   0.6863     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088480856,"data":"Cswa+Eswa+F                      0.6819   0.6772   0.6866     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088483556,"data":"A+B+Cswa+Dswa                    0.6818   0.6775   0.6862     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088486286,"data":"Cswa+Dswa+Gswa                   0.6818   0.6773   0.6863     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088489355,"data":"Dswa+Eswa                        0.6818   0.6773   0.6863     55.5  sí\r\n"}
+,{"stream_name":"stdout","time":463.088494409,"data":"A+Eswa+Gswa                      0.6818   0.6776   0.6860     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.08849728,"data":"A+B+Eswa+F                       0.6818   0.6773   0.6863     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088500008,"data":"B+Cswa+Eswa                      0.6818   0.6772   0.6864     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088502742,"data":"A+B+Cswa+Gswa                    0.6818   0.6775   0.6860     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088505467,"data":"A+B+Dswa+F                       0.6817   0.6774   0.6861     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":463.088508176,"data":"A+B+E+Eswa                       0.6817   0.6773   0.6862     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088510879,"data":"Cswa+E+F                         0.6817   0.6771   0.6863     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.08851366,"data":"A+B+Cswa+E                       0.6817   0.6772   0.6862     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088516361,"data":"A+B+F+Gswa                       0.6817   0.6774   0.6860     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088519119,"data":"Cswa+Dswa+F                      0.6817   0.6772   0.6862     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088521839,"data":"B+Cswa+Dswa                      0.6817   0.6772   0.6861     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088524564,"data":"E+Eswa+F                         0.6816   0.6770   0.6863     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088527276,"data":"A+B+E+F                          0.6816   0.6771   0.6861     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088529996,"data":"B+Eswa+F                         0.6816   0.6770   0.6862     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.08853269,"data":"B+Cswa+E                         0.6816   0.6770   0.6862     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088535461,"data":"Cswa+E+Eswa                      0.6816   0.6770   0.6862     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088538165,"data":"A+Dswa+E                         0.6815   0.6774   0.6857     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088540881,"data":"A+E+Gswa                         0.6815   0.6775   0.6855     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.08854357,"data":"B+E+Eswa                         0.6815   0.6769   0.6860     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088546287,"data":"A+Dswa+Gswa                      0.6815   0.6775   0.6854     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088549002,"data":"B+Dswa+F                         0.6815   0.6770   0.6860     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088551743,"data":"B+E+F                            0.6814   0.6769   0.6860     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088554473,"data":"Cswa+F+Gswa                      0.6814   0.6768   0.6861     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088557262,"data":"A+Cswa+Eswa                      0.6814   0.6769   0.6859     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088559993,"data":"Eswa+Gswa                        0.6814   0.6767   0.6861     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.088562707,"data":"B+Cswa+Gswa                      0.6814   0.6768   0.6860     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088565442,"data":"A+Eswa+F                         0.6814   0.6768   0.6859     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088568401,"data":"Dswa+E                           0.6814   0.6771   0.6856     55.5  sí\r\n"}
+,{"stream_name":"stdout","time":463.088573332,"data":"A+B+Cswa+F                       0.6813   0.6768   0.6859     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.08857616,"data":"B+F+Gswa                         0.6813   0.6767   0.6858     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088578873,"data":"Cswa+Eswa                        0.6812   0.6765   0.6859     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.088581622,"data":"A+Cswa+Dswa                      0.6812   0.6769   0.6854     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088584339,"data":"A+E+Eswa                         0.6811   0.6767   0.6855     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088587044,"data":"A+Cswa+E                         0.6811   0.6767   0.6855     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088589742,"data":"A+Dswa+F                         0.6811   0.6768   0.6854     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088592455,"data":"Eswa+F                           0.6811   0.6764   0.6858     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.088595248,"data":"A+B+Eswa                         0.6811   0.6766   0.6856     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088597967,"data":"A+E+F                            0.6811   0.6766   0.6855     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088600667,"data":"A+Cswa+Gswa                      0.6811   0.6769   0.6853     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088603434,"data":"A+F+Gswa                         0.6811   0.6769   0.6852     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088606194,"data":"E+Gswa                           0.6810   0.6766   0.6855     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.088608921,"data":"B+Cswa+F                         0.6809   0.6762   0.6856     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088611644,"data":"A+B+Dswa                         0.6809   0.6766   0.6852     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":463.088614364,"data":"B+Eswa                           0.6809   0.6763   0.6854     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.088617068,"data":"A+B+Gswa                         0.6808   0.6767   0.6850     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088619789,"data":"Cswa+E                           0.6808   0.6762   0.6854     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.088622511,"data":"A+B+E                            0.6808   0.6763   0.6852     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088625273,"data":"E+F                              0.6807   0.6761   0.6853     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.088627978,"data":"A+Cswa+F                         0.6806   0.6761   0.6852     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088630696,"data":"Dswa+Gswa                        0.6806   0.6761   0.6851     55.5  sí\r\n"}
+,{"stream_name":"stdout","time":463.088633404,"data":"Eswa                             0.6805   0.6758   0.6852     19.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088636096,"data":"Cswa+Dswa                        0.6805   0.6760   0.6850     55.5  sí\r\n"}
+,{"stream_name":"stdout","time":463.088638786,"data":"B+E                              0.6805   0.6759   0.6850     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.088641501,"data":"E+Eswa                           0.6805   0.6759   0.6851     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.088644226,"data":"A+B+Cswa                         0.6804   0.6758   0.6849     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088647198,"data":"Dswa+F                           0.6803   0.6759   0.6848     55.5  sí\r\n"}
+,{"stream_name":"stdout","time":463.088650002,"data":"B+Dswa                           0.6803   0.6759   0.6847     55.5  sí\r\n"}
+,{"stream_name":"stdout","time":463.088655267,"data":"A+Eswa                           0.6802   0.6757   0.6847     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.088658079,"data":"A+B+F                            0.6801   0.6755   0.6847     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.088660798,"data":"Cswa+Gswa                        0.6801   0.6754   0.6849     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.08866352,"data":"F+Gswa                           0.6801   0.6754   0.6847     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.088666265,"data":"B+Gswa                           0.6800   0.6754   0.6845     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.088668996,"data":"Cswa+F                           0.6797   0.6749   0.6845     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.088671765,"data":"B+Cswa                           0.6796   0.6749   0.6843     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.08867449,"data":"A+E                              0.6795   0.6751   0.6838     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.088677199,"data":"A+Gswa                           0.6794   0.6755   0.6832     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.0886799,"data":"A+Dswa                           0.6793   0.6752   0.6834     55.5  sí\r\n"}
+,{"stream_name":"stdout","time":463.08868261,"data":"B+F                              0.6790   0.6742   0.6837     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.088685328,"data":"E                                0.6790   0.6744   0.6835     19.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088688062,"data":"A+Cswa                           0.6788   0.6742   0.6833     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.088690764,"data":"A+F                              0.6784   0.6738   0.6830     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.088693661,"data":"A+B                              0.6779   0.6732   0.6825     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":463.088696364,"data":"Dswa                             0.6765   0.6721   0.6809     38.1  sí\r\n"}
+,{"stream_name":"stdout","time":463.08869907,"data":"Cswa                             0.6762   0.6713   0.6811     19.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088701778,"data":"Gswa                             0.6761   0.6712   0.6810     19.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088704508,"data":"F                                0.6747   0.6698   0.6797     19.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088707228,"data":"B                                0.6741   0.6691   0.6791     19.4  sí\r\n"}
+,{"stream_name":"stdout","time":463.088709963,"data":"A                                0.6716   0.6669   0.6763     19.4  sí\r\n"}
+,{"stream_name":"stdout","time":465.717211832,"data":"modelos                     GLOBAL WP       t0       t1  us/fila  entra\n"}
+,{"stream_name":"stdout","time":465.717241296,"data":"Dswa+Eswa+F+Gswa               0.6829   0.6784   0.6874     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717246246,"data":"B+Dswa+Eswa+Gswa               0.6828   0.6784   0.6873     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717251977,"data":"Dswa+E+F+Gswa                  0.6828   0.6784   0.6872     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717255697,"data":"Cswa+Dswa+Eswa+Gswa            0.6828   0.6782   0.6873     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717261109,"data":"B+Dswa+E+Gswa                  0.6828   0.6784   0.6871     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717264912,"data":"Dswa+E+Eswa+Gswa               0.6827   0.6783   0.6872     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717281733,"data":"Cswa+Dswa+Eswa+F               0.6827   0.6782   0.6872     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717286699,"data":"Cswa+Dswa+E+Gswa               0.6827   0.6783   0.6871     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717290685,"data":"B+Cswa+Dswa+Eswa               0.6827   0.6782   0.6871     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717294355,"data":"A+Dswa+Eswa+Gswa               0.6826   0.6785   0.6868     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717297949,"data":"B+Dswa+Eswa+F                  0.6826   0.6781   0.6871     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717301649,"data":"Dswa+E+Eswa+F                  0.6826   0.6781   0.6871     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717305237,"data":"Cswa+Dswa+E+F                  0.6826   0.6781   0.6871     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717308926,"data":"B+Cswa+Dswa+E                  0.6826   0.6781   0.6870     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.71731824,"data":"B+Dswa+E+Eswa                  0.6825   0.6781   0.6869     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717321264,"data":"B+Dswa+E+F                     0.6825   0.6781   0.6869     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717323731,"data":"Cswa+Dswa+E+Eswa               0.6825   0.6781   0.6870     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.71732627,"data":"Cswa+Eswa+F+Gswa               0.6825   0.6779   0.6871     71.4  sí\n"}
+,{"stream_name":"stdout","time":465.717329273,"data":"Dswa+Eswa+Gswa                 0.6825   0.6779   0.6870     72.8  sí\n"}
+,{"stream_name":"stdout","time":465.717331747,"data":"A+Dswa+E+Gswa                  0.6825   0.6784   0.6865     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717334261,"data":"E+Eswa+F+Gswa                  0.6825   0.6779   0.6870     71.4  sí\n"}
+,{"stream_name":"stdout","time":465.717336725,"data":"B+Cswa+Eswa+Gswa               0.6825   0.6779   0.6870     71.4  sí\n"}
+,{"stream_name":"stdout","time":465.717339162,"data":"B+Eswa+F+Gswa                  0.6824   0.6779   0.6870     71.4  sí\n"}
+,{"stream_name":"stdout","time":465.71734172,"data":"Cswa+Dswa+F+Gswa               0.6824   0.6779   0.6869     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717344182,"data":"B+Cswa+Dswa+Gswa               0.6824   0.6780   0.6869     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717346755,"data":"Cswa+E+F+Gswa                  0.6824   0.6779   0.6870     71.4  sí\n"}
+,{"stream_name":"stdout","time":465.717349782,"data":"A+Dswa+Eswa+F                  0.6824   0.6781   0.6868     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717367788,"data":"B+Dswa+F+Gswa                  0.6824   0.6780   0.6868     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717373831,"data":"A+Cswa+Dswa+Eswa               0.6824   0.6781   0.6867     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.717378193,"data":"B+E+Eswa+Gswa                  0.6824   0.6779   0.6869     71.4  sí\n"}
+,{"stream_name":"stdout","time":465.717382653,"data":"B+E+F+Gswa                     0.6824   0.6779   0.6868     71.4  sí\n"}
+,{"stream_name":"stdout","time":465.717386841,"data":"B+Cswa+E+Gswa                  0.6824   0.6779   0.6869     71.4  sí\n"}
+,{"stream_name":"stdout","time":465.717390477,"data":"Cswa+E+Eswa+Gswa               0.6824   0.6778   0.6869     71.4  sí\n"}
+,{"stream_name":"stdout","time":465.717394147,"data":"Dswa+Eswa+F                    0.6824   0.6778   0.6869     72.8  sí\n"}
+,{"stream_name":"stdout","time":465.717397766,"data":"A+Eswa+F+Gswa                  0.6823   0.6780   0.6866     71.4  sí\n"}
+,{"stream_name":"stdout","time":465.717401374,"data":"Cswa+Dswa+Eswa                 0.6823   0.6778   0.6868     72.8  sí\n"}
+,{"stream_name":"stdout","time":465.717408995,"data":"Dswa+E+Gswa                    0.6823   0.6780   0.6866     72.8  sí\n"}
+,{"stream_name":"stdout","time":465.717412641,"data":"A+Cswa+Eswa+Gswa               0.6823   0.6780   0.6866     71.4  sí\n"}
+,{"stream_name":"stdout","time":465.717416258,"data":"B+Dswa+Eswa                    0.6823   0.6779   0.6867     72.8  sí\n"}
+,{"stream_name":"stdout","time":465.717419955,"data":"A+B+Dswa+Eswa                  0.6823   0.6780   0.6866     90.2  NO\n"}
+,{"stream_name":"stdout","time":465.737736205,"data":"Maestros: Dswa+Eswa+F+Gswa  (valid 0.6829)\n"}
+,{"stream_name":"stdout","time":467.764657866,"data":"device=cuda  batch=32  chunk=512  torch=2.10.0+cu128\r\n"}
+,{"stream_name":"stdout","time":486.241796464,"data":"Normalizador: 200 grupos, 112 entradas (16s)\r\n"}
+,{"stream_name":"stdout","time":492.227844795,"data":"Destilación: 4 teachers, peso 1.0\r\n"}
+,{"stream_name":"stdout","time":497.064158712,"data":"  soft targets 32/10607 (0.1 min)\r\n"}
+,{"stream_name":"stdout","time":497.312165833,"data":"Traceback (most recent call last):\r\n"}
+,{"stream_name":"stdout","time":497.312205815,"data":"  File \"/kaggle/working/train_official_gpu_v1.py\", line 604, in \u003cmodule\u003e\r\n"}
+,{"stream_name":"stdout","time":497.312213192,"data":"    main()\r\n"}
+,{"stream_name":"stdout","time":497.312218714,"data":"  File \"/kaggle/working/train_official_gpu_v1.py\", line 444, in main\r\n"}
+,{"stream_name":"stdout","time":497.31222453,"data":"    soft_cache = precompute_soft(teachers, cfg[\"distill_teachers\"], train, train_ids, batch, cfg[\"workers\"], device, cfg[\"distill_cache\"] or None)\r\n"}
+,{"stream_name":"stdout","time":497.312230228,"data":"                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":497.312235915,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py\", line 124, in decorate_context\r\n"}
+,{"stream_name":"stdout","time":497.312241979,"data":"    return func(*args, **kwargs)\r\n"}
+,{"stream_name":"stdout","time":497.31224739,"data":"           ^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":497.312253114,"data":"  File \"/kaggle/working/train_official_gpu_v1.py\", line 329, in precompute_soft\r\n"}
+,{"stream_name":"stdout","time":497.312259212,"data":"    acc = acc + tnet[\"head\"](tnet[\"core\"](zt)[0])\r\n"}
+,{"stream_name":"stdout","time":497.312264633,"data":"                             ^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":497.31227021,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py\", line 1776, in _wrapped_call_impl\r\n"}
+,{"stream_name":"stdout","time":497.312275699,"data":"    return self._call_impl(*args, **kwargs)\r\n"}
+,{"stream_name":"stdout","time":497.312280796,"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":497.312285872,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py\", line 1787, in _call_impl\r\n"}
+,{"stream_name":"stdout","time":497.312291183,"data":"    return forward_call(*args, **kwargs)\r\n"}
+,{"stream_name":"stdout","time":497.31229674,"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":497.312301886,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/nn/modules/rnn.py\", line 1415, in forward\r\n"}
+,{"stream_name":"stdout","time":497.312309142,"data":"    result = _VF.gru(\r\n"}
+,{"stream_name":"stdout","time":497.312318848,"data":"             ^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":497.312335407,"data":"torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 7.61 GiB. GPU 0 has a total capacity of 14.56 GiB of which 5.81 GiB is free. Including non-PyTorch memory, this process has 8.75 GiB memory in use. Of the allocated memory 1.27 GiB is allocated by PyTorch, and 7.35 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)\r\n"}
+,{"stream_name":"stdout","time":500.477886792,"data":"FALLÓ student_2032 (sigue con el siguiente)\r\n"}
+,{"stream_name":"stdout","time":502.711886538,"data":"device=cuda  batch=32  chunk=512  torch=2.10.0+cu128\r\n"}
+,{"stream_name":"stdout","time":520.332222275,"data":"Normalizador: 200 grupos, 112 entradas (16s)\r\n"}
+,{"stream_name":"stdout","time":521.703178162,"data":"Destilación: 4 teachers, peso 1.0\r\n"}
+,{"stream_name":"stdout","time":525.21025117,"data":"  soft targets 32/10607 (0.1 min)\r\n"}
+,{"stream_name":"stdout","time":525.413173061,"data":"Traceback (most recent call last):\r\n"}
+,{"stream_name":"stdout","time":525.413646904,"data":"  File \"/kaggle/working/train_official_gpu_v1.py\", line 604, in \u003cmodule\u003e\r\n"}
+,{"stream_name":"stdout","time":525.415780307,"data":"    main()\r\n"}
+,{"stream_name":"stdout","time":525.415812806,"data":"  File \"/kaggle/working/train_official_gpu_v1.py\", line 444, in main\r\n"}
+,{"stream_name":"stdout","time":525.415819819,"data":"    soft_cache = precompute_soft(teachers, cfg[\"distill_teachers\"], train, train_ids, batch, cfg[\"workers\"], device, cfg[\"distill_cache\"] or None)\r\n"}
+,{"stream_name":"stdout","time":525.415827156,"data":"                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":525.41583343,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py\", line 124, in decorate_context\r\n"}
+,{"stream_name":"stdout","time":525.415839196,"data":"    return func(*args, **kwargs)\r\n"}
+,{"stream_name":"stdout","time":525.415844747,"data":"           ^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":525.415850139,"data":"  File \"/kaggle/working/train_official_gpu_v1.py\", line 329, in precompute_soft\r\n"}
+,{"stream_name":"stdout","time":525.415855955,"data":"    acc = acc + tnet[\"head\"](tnet[\"core\"](zt)[0])\r\n"}
+,{"stream_name":"stdout","time":525.415862538,"data":"                             ^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":525.415868458,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py\", line 1776, in _wrapped_call_impl\r\n"}
+,{"stream_name":"stdout","time":525.415874464,"data":"    return self._call_impl(*args, **kwargs)\r\n"}
+,{"stream_name":"stdout","time":525.415880064,"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":525.415886087,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py\", line 1787, in _call_impl\r\n"}
+,{"stream_name":"stdout","time":525.415892016,"data":"    return forward_call(*args, **kwargs)\r\n"}
+,{"stream_name":"stdout","time":525.415897527,"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":525.415903168,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/nn/modules/rnn.py\", line 1415, in forward\r\n"}
+,{"stream_name":"stdout","time":525.41590935,"data":"    result = _VF.gru(\r\n"}
+,{"stream_name":"stdout","time":525.415914652,"data":"             ^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":525.415933946,"data":"torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 7.61 GiB. GPU 0 has a total capacity of 14.56 GiB of which 5.81 GiB is free. Including non-PyTorch memory, this process has 8.75 GiB memory in use. Of the allocated memory 1.27 GiB is allocated by PyTorch, and 7.35 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)\r\n"}
+,{"stream_name":"stdout","time":527.437808707,"data":"FALLÓ student_2033 (sigue con el siguiente)\r\n"}
+,{"stream_name":"stdout","time":529.564874157,"data":"device=cuda  batch=32  chunk=512  torch=2.10.0+cu128\r\n"}
+,{"stream_name":"stdout","time":547.393558248,"data":"Normalizador: 200 grupos, 112 entradas (16s)\r\n"}
+,{"stream_name":"stdout","time":548.76708046,"data":"Destilación: 4 teachers, peso 1.0\r\n"}
+,{"stream_name":"stdout","time":552.223306434,"data":"  soft targets 32/10607 (0.1 min)\r\n"}
+,{"stream_name":"stdout","time":552.426670668,"data":"Traceback (most recent call last):\r\n"}
+,{"stream_name":"stdout","time":552.427933064,"data":"  File \"/kaggle/working/train_official_gpu_v1.py\", line 604, in \u003cmodule\u003e\r\n"}
+,{"stream_name":"stdout","time":552.42795566,"data":"    main()\r\n"}
+,{"stream_name":"stdout","time":552.427963025,"data":"  File \"/kaggle/working/train_official_gpu_v1.py\", line 444, in main\r\n"}
+,{"stream_name":"stdout","time":552.427970194,"data":"    soft_cache = precompute_soft(teachers, cfg[\"distill_teachers\"], train, train_ids, batch, cfg[\"workers\"], device, cfg[\"distill_cache\"] or None)\r\n"}
+,{"stream_name":"stdout","time":552.427979468,"data":"                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":552.427987755,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py\", line 124, in decorate_context\r\n"}
+,{"stream_name":"stdout","time":552.427993505,"data":"    return func(*args, **kwargs)\r\n"}
+,{"stream_name":"stdout","time":552.427999041,"data":"           ^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":552.428004717,"data":"  File \"/kaggle/working/train_official_gpu_v1.py\", line 329, in precompute_soft\r\n"}
+,{"stream_name":"stdout","time":552.428010817,"data":"    acc = acc + tnet[\"head\"](tnet[\"core\"](zt)[0])\r\n"}
+,{"stream_name":"stdout","time":552.428016754,"data":"                             ^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":552.428022411,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py\", line 1776, in _wrapped_call_impl\r\n"}
+,{"stream_name":"stdout","time":552.428028274,"data":"    return self._call_impl(*args, **kwargs)\r\n"}
+,{"stream_name":"stdout","time":552.428033882,"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":552.428040122,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py\", line 1787, in _call_impl\r\n"}
+,{"stream_name":"stdout","time":552.428079911,"data":"    return forward_call(*args, **kwargs)\r\n"}
+,{"stream_name":"stdout","time":552.428087473,"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":552.428094658,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/nn/modules/rnn.py\", line 1415, in forward\r\n"}
+,{"stream_name":"stdout","time":552.428102304,"data":"    result = _VF.gru(\r\n"}
+,{"stream_name":"stdout","time":552.428108669,"data":"             ^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":552.428127523,"data":"torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 7.61 GiB. GPU 0 has a total capacity of 14.56 GiB of which 5.81 GiB is free. Including non-PyTorch memory, this process has 8.75 GiB memory in use. Of the allocated memory 1.27 GiB is allocated by PyTorch, and 7.35 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)\r\n"}
+,{"stream_name":"stdout","time":554.448128861,"data":"FALLÓ student_2034 (sigue con el siguiente)\r\n"}
+,{"stream_name":"stdout","time":556.579863255,"data":"device=cuda  batch=32  chunk=512  torch=2.10.0+cu128\r\n"}
+,{"stream_name":"stdout","time":574.76452328,"data":"Normalizador: 200 grupos, 112 entradas (16s)\r\n"}
+,{"stream_name":"stdout","time":576.1369625,"data":"Destilación: 4 teachers, peso 1.0\r\n"}
+,{"stream_name":"stdout","time":579.592163766,"data":"  soft targets 32/10607 (0.1 min)\r\n"}
+,{"stream_name":"stdout","time":579.796089358,"data":"Traceback (most recent call last):\r\n"}
+,{"stream_name":"stdout","time":579.796150012,"data":"  File \"/kaggle/working/train_official_gpu_v1.py\", line 604, in \u003cmodule\u003e\r\n"}
+,{"stream_name":"stdout","time":579.796158846,"data":"    main()\r\n"}
+,{"stream_name":"stdout","time":579.796164566,"data":"  File \"/kaggle/working/train_official_gpu_v1.py\", line 444, in main\r\n"}
+,{"stream_name":"stdout","time":579.796170296,"data":"    soft_cache = precompute_soft(teachers, cfg[\"distill_teachers\"], train, train_ids, batch, cfg[\"workers\"], device, cfg[\"distill_cache\"] or None)\r\n"}
+,{"stream_name":"stdout","time":579.796176646,"data":"                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":579.796182584,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py\", line 124, in decorate_context\r\n"}
+,{"stream_name":"stdout","time":579.796189041,"data":"    return func(*args, **kwargs)\r\n"}
+,{"stream_name":"stdout","time":579.796194943,"data":"           ^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":579.796200622,"data":"  File \"/kaggle/working/train_official_gpu_v1.py\", line 329, in precompute_soft\r\n"}
+,{"stream_name":"stdout","time":579.796206345,"data":"    acc = acc + tnet[\"head\"](tnet[\"core\"](zt)[0])\r\n"}
+,{"stream_name":"stdout","time":579.796212072,"data":"                             ^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":579.79621772,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py\", line 1776, in _wrapped_call_impl\r\n"}
+,{"stream_name":"stdout","time":579.796224075,"data":"    return self._call_impl(*args, **kwargs)\r\n"}
+,{"stream_name":"stdout","time":579.796230079,"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":579.796235426,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py\", line 1787, in _call_impl\r\n"}
+,{"stream_name":"stdout","time":579.79624087,"data":"    return forward_call(*args, **kwargs)\r\n"}
+,{"stream_name":"stdout","time":579.796246046,"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":579.79625304,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/nn/modules/rnn.py\", line 1415, in forward\r\n"}
+,{"stream_name":"stdout","time":579.796279199,"data":"    result = _VF.gru(\r\n"}
+,{"stream_name":"stdout","time":579.7962852,"data":"             ^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":579.796307357,"data":"torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 7.61 GiB. GPU 0 has a total capacity of 14.56 GiB of which 5.81 GiB is free. Including non-PyTorch memory, this process has 8.75 GiB memory in use. Of the allocated memory 1.27 GiB is allocated by PyTorch, and 7.35 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)\r\n"}
+,{"stream_name":"stdout","time":581.886019801,"data":"FALLÓ student_2035 (sigue con el siguiente)\r\n"}
+,{"stream_name":"stdout","time":584.069529689,"data":"device=cuda  batch=32  chunk=512  torch=2.10.0+cu128\r\n"}
+,{"stream_name":"stdout","time":601.033901752,"data":"Normalizador: 200 grupos, 112 entradas (15s)\r\n"}
+,{"stream_name":"stdout","time":602.354546125,"data":"Destilación: 4 teachers, peso 1.0\r\n"}
+,{"stream_name":"stdout","time":605.865900744,"data":"  soft targets 32/10607 (0.1 min)\r\n"}
+,{"stream_name":"stdout","time":606.07041006,"data":"Traceback (most recent call last):\r\n"}
+,{"stream_name":"stdout","time":606.070462314,"data":"  File \"/kaggle/working/train_official_gpu_v1.py\", line 604, in \u003cmodule\u003e\r\n"}
+,{"stream_name":"stdout","time":606.070471368,"data":"    main()\r\n"}
+,{"stream_name":"stdout","time":606.070477644,"data":"  File \"/kaggle/working/train_official_gpu_v1.py\", line 444, in main\r\n"}
+,{"stream_name":"stdout","time":606.070485631,"data":"    soft_cache = precompute_soft(teachers, cfg[\"distill_teachers\"], train, train_ids, batch, cfg[\"workers\"], device, cfg[\"distill_cache\"] or None)\r\n"}
+,{"stream_name":"stdout","time":606.070500367,"data":"                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":606.070508385,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py\", line 124, in decorate_context\r\n"}
+,{"stream_name":"stdout","time":606.07051633,"data":"    return func(*args, **kwargs)\r\n"}
+,{"stream_name":"stdout","time":606.070523032,"data":"           ^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":606.070529105,"data":"  File \"/kaggle/working/train_official_gpu_v1.py\", line 329, in precompute_soft\r\n"}
+,{"stream_name":"stdout","time":606.070535159,"data":"    acc = acc + tnet[\"head\"](tnet[\"core\"](zt)[0])\r\n"}
+,{"stream_name":"stdout","time":606.070541328,"data":"                             ^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":606.070547129,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py\", line 1776, in _wrapped_call_impl\r\n"}
+,{"stream_name":"stdout","time":606.070553375,"data":"    return self._call_impl(*args, **kwargs)\r\n"}
+,{"stream_name":"stdout","time":606.070559131,"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":606.070564963,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py\", line 1787, in _call_impl\r\n"}
+,{"stream_name":"stdout","time":606.07057193,"data":"    return forward_call(*args, **kwargs)\r\n"}
+,{"stream_name":"stdout","time":606.070577659,"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":606.070584693,"data":"  File \"/usr/local/lib/python3.12/dist-packages/torch/nn/modules/rnn.py\", line 1415, in forward\r\n"}
+,{"stream_name":"stdout","time":606.070592543,"data":"    result = _VF.gru(\r\n"}
+,{"stream_name":"stdout","time":606.070600519,"data":"             ^^^^^^^^\r\n"}
+,{"stream_name":"stdout","time":606.070626438,"data":"torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 7.61 GiB. GPU 0 has a total capacity of 14.56 GiB of which 5.81 GiB is free. Including non-PyTorch memory, this process has 8.75 GiB memory in use. Of the allocated memory 1.27 GiB is allocated by PyTorch, and 7.35 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)\r\n"}
+,{"stream_name":"stdout","time":608.129418325,"data":"FALLÓ student_2036 (sigue con el siguiente)\r\n"}
+,{"stream_name":"stdout","time":610.526972761,"data":"B: GRU h=128 x2  (/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128_santiago_base.pt)\r\n"}
+,{"stream_name":"stdout","time":610.52701049,"data":"Cswa: GRU h=128 x2  (/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128_drop_seed2028_swa.pt)\r\n"}
+,{"stream_name":"stdout","time":610.527016219,"data":"Dswa: GRU h=192 x2  (/kaggle/input/datasets/joaquinfiorina/connectome-models/gru192_seed2027_swa.pt)\r\n"}
+,{"stream_name":"stdout","time":610.577791969,"data":"Eswa: GRU h=128 x2  (/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128_distill_seed2029_swa.pt)\r\n"}
+,{"stream_name":"stdout","time":610.577835965,"data":"Gswa: GRU h=128 x2  (/kaggle/input/datasets/joaquinfiorina/connectome-models/gru128_gwp_seed2031_swa.pt)\r\n"}
+,{"stream_name":"stdout","time":628.209159679,"data":"  160/1873 seqs (0.3 min)\r\n"}
+,{"stream_name":"stdout","time":644.994869179,"data":"  320/1873 seqs (0.6 min)\r\n"}
+,{"stream_name":"stdout","time":661.796193913,"data":"  480/1873 seqs (0.8 min)\r\n"}
+,{"stream_name":"stdout","time":678.626804988,"data":"  640/1873 seqs (1.1 min)\r\n"}
+,{"stream_name":"stdout","time":695.445643397,"data":"  800/1873 seqs (1.4 min)\r\n"}
+,{"stream_name":"stdout","time":712.374627259,"data":"  960/1873 seqs (1.7 min)\r\n"}
+,{"stream_name":"stdout","time":729.270961813,"data":"  1120/1873 seqs (2.0 min)\r\n"}
+,{"stream_name":"stdout","time":746.244251069,"data":"  1280/1873 seqs (2.3 min)\r\n"}
+,{"stream_name":"stdout","time":763.413265108,"data":"  1440/1873 seqs (2.5 min)\r\n"}
+,{"stream_name":"stdout","time":780.558173404,"data":"  1600/1873 seqs (2.8 min)\r\n"}
+,{"stream_name":"stdout","time":797.848232953,"data":"  1760/1873 seqs (3.1 min)\r\n"}
+,{"stream_name":"stdout","time":810.45180528,"data":"  1873/1873 seqs (3.3 min)\r\n"}
+,{"stream_name":"stdout","time":810.451848653,"data":"\r\n"}
+,{"stream_name":"stdout","time":810.451854733,"data":"modelos                       GLOBAL WP       t0       t1  us/fila  entra\r\n"}
+,{"stream_name":"stdout","time":810.451859953,"data":"B+Dswa+Eswa+Gswa                 0.6828   0.6784   0.6873     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":810.451864525,"data":"Cswa+Dswa+Eswa+Gswa              0.6828   0.6782   0.6873     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":810.451869311,"data":"B+Cswa+Dswa+Eswa                 0.6827   0.6782   0.6871     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":810.451873944,"data":"Dswa+Eswa+Gswa                   0.6825   0.6779   0.6870     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":810.451879343,"data":"B+Cswa+Eswa+Gswa                 0.6825   0.6779   0.6870     71.4  sí\r\n"}
+,{"stream_name":"stdout","time":810.451883914,"data":"B+Cswa+Dswa+Gswa                 0.6824   0.6780   0.6869     90.2  NO\r\n"}
+,{"stream_name":"stdout","time":810.45188854,"data":"Cswa+Dswa+Eswa                   0.6823   0.6778   0.6868     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":810.45189364,"data":"B+Dswa+Eswa                      0.6823   0.6779   0.6867     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":810.451912111,"data":"Cswa+Eswa+Gswa                   0.6820   0.6774   0.6867     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":810.451915989,"data":"B+Eswa+Gswa                      0.6820   0.6775   0.6866     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":810.451919817,"data":"B+Dswa+Gswa                      0.6819   0.6775   0.6863     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":810.451923917,"data":"Cswa+Dswa+Gswa                   0.6818   0.6773   0.6863     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":810.451927663,"data":"Dswa+Eswa                        0.6818   0.6773   0.6863     55.5  sí\r\n"}
+,{"stream_name":"stdout","time":810.451931263,"data":"B+Cswa+Eswa                      0.6818   0.6772   0.6864     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":810.451934587,"data":"B+Cswa+Dswa                      0.6817   0.6772   0.6861     72.8  sí\r\n"}
+,{"stream_name":"stdout","time":810.451938259,"data":"Eswa+Gswa                        0.6814   0.6767   0.6861     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":810.451941773,"data":"B+Cswa+Gswa                      0.6814   0.6768   0.6860     54.1  sí\r\n"}
+,{"stream_name":"stdout","time":810.451945453,"data":"Cswa+Eswa                        0.6812   0.6765   0.6859     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":810.451949287,"data":"B+Eswa                           0.6809   0.6763   0.6854     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":810.451953037,"data":"Dswa+Gswa                        0.6806   0.6761   0.6851     55.5  sí\r\n"}
+,{"stream_name":"stdout","time":810.451956887,"data":"Eswa                             0.6805   0.6758   0.6852     19.4  sí\r\n"}
+,{"stream_name":"stdout","time":810.451960298,"data":"Cswa+Dswa                        0.6805   0.6760   0.6850     55.5  sí\r\n"}
+,{"stream_name":"stdout","time":810.451963796,"data":"B+Dswa                           0.6803   0.6759   0.6847     55.5  sí\r\n"}
+,{"stream_name":"stdout","time":810.451967257,"data":"Cswa+Gswa                        0.6801   0.6754   0.6849     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":810.451970744,"data":"B+Gswa                           0.6800   0.6754   0.6845     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":810.451974563,"data":"B+Cswa                           0.6796   0.6749   0.6843     36.7  sí\r\n"}
+,{"stream_name":"stdout","time":810.451979975,"data":"Dswa                             0.6765   0.6721   0.6809     38.1  sí\r\n"}
+,{"stream_name":"stdout","time":810.451983553,"data":"Cswa                             0.6762   0.6713   0.6811     19.4  sí\r\n"}
+,{"stream_name":"stdout","time":810.451987323,"data":"Gswa                             0.6761   0.6712   0.6810     19.4  sí\r\n"}
+,{"stream_name":"stdout","time":810.451990997,"data":"B                                0.6741   0.6691   0.6791     19.4  sí\r\n"}
+,{"stream_name":"stdout","time":811.222814371,"data":"modelos                     GLOBAL WP       t0       t1  us/fila  entra\n"}
+,{"stream_name":"stdout","time":811.222847997,"data":"B+Dswa+Eswa+Gswa               0.6828   0.6784   0.6873     90.2  NO\n"}
+,{"stream_name":"stdout","time":811.2228542,"data":"Cswa+Dswa+Eswa+Gswa            0.6828   0.6782   0.6873     90.2  NO\n"}
+,{"stream_name":"stdout","time":811.222859025,"data":"B+Cswa+Dswa+Eswa               0.6827   0.6782   0.6871     90.2  NO\n"}
+,{"stream_name":"stdout","time":811.222864125,"data":"Dswa+Eswa+Gswa                 0.6825   0.6779   0.6870     72.8  sí\n"}
+,{"stream_name":"stdout","time":811.222869492,"data":"B+Cswa+Eswa+Gswa               0.6825   0.6779   0.6870     71.4  sí\n"}
+,{"stream_name":"stdout","time":811.222889165,"data":"B+Cswa+Dswa+Gswa               0.6824   0.6780   0.6869     90.2  NO\n"}
+,{"stream_name":"stdout","time":811.222893585,"data":"Cswa+Dswa+Eswa                 0.6823   0.6778   0.6868     72.8  sí\n"}
+,{"stream_name":"stdout","time":811.222898306,"data":"B+Dswa+Eswa                    0.6823   0.6779   0.6867     72.8  sí\n"}
+,{"stream_name":"stdout","time":811.222902869,"data":"Cswa+Eswa+Gswa                 0.6820   0.6774   0.6867     54.1  sí\n"}
+,{"stream_name":"stdout","time":811.222907437,"data":"B+Eswa+Gswa                    0.6820   0.6775   0.6866     54.1  sí\n"}
+,{"stream_name":"stdout","time":811.222911662,"data":"B+Dswa+Gswa                    0.6819   0.6775   0.6863     72.8  sí\n"}
+,{"stream_name":"stdout","time":811.22291591,"data":"Cswa+Dswa+Gswa                 0.6818   0.6773   0.6863     72.8  sí\n"}
+,{"stream_name":"stdout","time":811.2229207,"data":"Dswa+Eswa                      0.6818   0.6773   0.6863     55.5  sí\n"}
+,{"stream_name":"stdout","time":811.222924702,"data":"B+Cswa+Eswa                    0.6818   0.6772   0.6864     54.1  sí\n"}
+,{"stream_name":"stdout","time":811.222929152,"data":"B+Cswa+Dswa                    0.6817   0.6772   0.6861     72.8  sí\n"}
+,{"stream_name":"stdout","time":811.222933493,"data":"Eswa+Gswa                      0.6814   0.6767   0.6861     36.7  sí\n"}
+,{"stream_name":"stdout","time":811.222938465,"data":"B+Cswa+Gswa                    0.6814   0.6768   0.6860     54.1  sí\n"}
+,{"stream_name":"stdout","time":811.222943075,"data":"Cswa+Eswa                      0.6812   0.6765   0.6859     36.7  sí\n"}
+,{"stream_name":"stdout","time":811.22294697,"data":"B+Eswa                         0.6809   0.6763   0.6854     36.7  sí\n"}
+,{"stream_name":"stdout","time":811.222950977,"data":"Dswa+Gswa                      0.6806   0.6761   0.6851     55.5  sí\n"}
+,{"stream_name":"stdout","time":811.222954842,"data":"Eswa                           0.6805   0.6758   0.6852     19.4  sí\n"}
+,{"stream_name":"stdout","time":811.222958738,"data":"Cswa+Dswa                      0.6805   0.6760   0.6850     55.5  sí\n"}
+,{"stream_name":"stdout","time":811.22296348,"data":"B+Dswa                         0.6803   0.6759   0.6847     55.5  sí\n"}
+,{"stream_name":"stdout","time":811.222968474,"data":"Cswa+Gswa                      0.6801   0.6754   0.6849     36.7  sí\n"}
+,{"stream_name":"stdout","time":811.222973184,"data":"B+Gswa                         0.6800   0.6754   0.6845     36.7  sí\n"}
+,{"stream_name":"stdout","time":811.222977665,"data":"B+Cswa                         0.6796   0.6749   0.6843     36.7  sí\n"}
+,{"stream_name":"stdout","time":811.222982319,"data":"Dswa                           0.6765   0.6721   0.6809     38.1  sí\n"}
+,{"stream_name":"stdout","time":811.222987517,"data":"Cswa                           0.6762   0.6713   0.6811     19.4  sí\n"}
+,{"stream_name":"stdout","time":811.222994422,"data":"Gswa                           0.6761   0.6712   0.6810     19.4  sí\n"}
+,{"stream_name":"stdout","time":811.222998529,"data":"B                              0.6741   0.6691   0.6791     19.4  sí\n"}
+,{"stream_name":"stderr","time":814.605233039,"data":"/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":814.605268568,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":814.793787348,"data":"/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":814.793824512,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":815.499674447,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":815.864836347,"data":"[NbConvertApp] Writing 115303 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":818.568259129,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":819.703696897,"data":"[NbConvertApp] Writing 624880 bytes to __results__.html\n"}
+]
