@@ -162,6 +162,102 @@ usarlos solo ahí. Dos cortes, los dos disponibles en inferencia, sobre 388.058 
 hay región donde convenga darles más peso. Un peso por quintil elegido honestamente da **−0.0037**, peor que
 el peso único (−0.0014): más libertad para elegir = más sesgo, que es la misma lección de siempre.
 
+### El leaderboard real y lo que vale cada milésima (2026-10-21)
+
+Fuimos al leaderboard completo por primera vez. **El campo es densísimo:**
+
+| puesto | puntaje |
+|---|---|
+| 1 | 0.67380 |
+| 50 | 0.66517 |
+| 100 | 0.66256 |
+| 200 | 0.65934 |
+| 300 | 0.65685 |
+| 400 | 0.65491 |
+| **nosotros** | **0.65400** |
+
+**De #400 a #100 hay 0.0077.** Con nuestra brecha medida valid → leaderboard de 0.0323:
+
+| mejora en valid | puesto |
+|---|---|
+| +0.001 | ~396 |
+| +0.002 | ~352 |
+| +0.003 | ~294 |
+| +0.005 | ~214 |
+| +0.008 | ~118 |
+
+**Esto corrige un error de criterio que venía arrastrando:** descarté sistemáticamente mejoras de +0.002
+llamándolas "ruido". Son ruido *para medirlas en valid*, pero valen **60 posiciones**.
+
+Otro dato del leaderboard: los equipos del top 100 llevan entre 20 y 193 submissions. **Nosotros llevamos 8**,
+teniendo 5 por día disponibles.
+
+Y se verificó una sospecha: la página dice "N≈200 features" y nosotros usamos 112. El parquet tiene 118
+columnas = 112 features + 2 targets + 4 de control. **No hay nada escondido.**
+
+### Destilar nos costó la mitad del ensamble (2026-10-21)
+
+Nuestro ensamble de 4 gana apenas **+0.0021** sobre el mejor modelo solo. En una competencia normal promediar
+4 modelos vale entre +0.005 y +0.015. La causa estaba a la vista desde el sprint 15 y nunca la medimos de
+frente: **los 4 están destilados de los MISMOS 4 maestros**, así que son casi el mismo modelo.
+
+Medido sobre todo valid, comparando con 4 modelos **sin destilar** que teníamos guardados del sprint 4:
+
+| familia | mejor solo | correlación entre ellos | ensamble de 4 | lo que gana promediar |
+|---|---|---|---|---|
+| destilados | 0.6843 | **0.9854** | **0.6864** | +0.0021 |
+| sin destilar | 0.6794 | **0.9635** | 0.6845 | **+0.0051** |
+
+**El mecanismo queda confirmado: sin destilar, promediar vale 2,4 veces más.** Pero los que tenemos sin
+destilar son del sprint 4 (8 épocas, receta vieja, sin SWA) y arrancan 0.005 más abajo, así que su ensamble
+termina *debajo* del nuestro. Mezclar las dos familias da +0.0004: la correlación cruzada es 0.9739.
+
+**La comparación justa nunca se hizo:** sin destilar pero con la receta de ahora. Proyectando con el factor
+medido (×1.00974 contra ×1.00424):
+
+| si cada modelo diera | ensamble de 4 | leaderboard | puesto |
+|---|---|---|---|
+| 0.6808 (una LSTM sin destilar bien entrenada) | 0.6874 | 0.6551 | ~391 |
+| 0.6820 | 0.6886 | 0.6563 | ~331 |
+| 0.6835 | 0.6902 | 0.6579 | ~262 |
+
+**Y lo que falta probar, que es lo que de verdad sigue:** nunca variamos **nada** entre los modelos del
+ensamble. Todos vieron los mismos datos, los mismos maestros y la misma receta; lo único distinto fue la
+semilla. Las tres palancas estándar de diversidad están sin usar:
+
+1. **maestros distintos por alumno** (subconjuntos disjuntos de los 4) — conserva el +0.003 de destilar sin
+   que todos converjan al mismo objetivo
+2. **datos distintos por modelo** (bagging: 70 % de las secuencias, distinto para cada uno)
+3. recetas distintas (tamaños y tasas de aprendizaje), que es lo único que sí variamos a medias
+
+### La regularidad que cierra la rama de arquitecturas (2026-10-21)
+
+Con la Echo State Network quedan cinco familias medidas **en las mismas 200 secuencias de valid**, contra el
+mismo ensamble de 4 redes (S = 0.6755). La columna que importa es `s/r`, porque el criterio `s > S·r` se puede
+escribir **`s/r > S`**:
+
+| modelo | puntaje (s) | correlación (r) | **s/r** | margen (s − S·r) | aporte honesto |
+|---|---|---|---|---|---|
+| otra LSTM (train+valid) | 0.6729 | 0.9951 | **0.6762** | +0.0007 | +0.0000 |
+| LightGBM | 0.6390 | 0.9271 | **0.6892** | +0.0127 | −0.0014 |
+| XGBoost | 0.6405 | 0.9279 | **0.6903** | +0.0137 | −0.0015 |
+| Echo State Network | 0.6099 | 0.8756 | **0.6966** | +0.0184 | −0.0019 |
+| *el ensamble* | *0.6755* | | | | |
+
+**`s/r` es casi constante — entre 0.676 y 0.697 — para cuatro familias de modelos radicalmente distintas**
+(una LSTM entrenada por gradiente, árboles con boosting por hojas, árboles por niveles, y un reservorio
+recurrente aleatorio que no se entrena). Y el ensamble está en 0.6755, justo en el medio de ese rango.
+
+Dicho de otra forma: **cada modelo que logramos construir cae exactamente sobre la línea de empate.** Los que
+son más distintos (r más bajo) son peores en la misma proporción, y las dos cosas se cancelan.
+
+Y hay un segundo efecto que termina de explicar los números negativos: aunque el margen sea nominalmente
+positivo (+0.013 a +0.018), **elegir honestamente cuánto peso darle al modelo nuevo cuesta más ruido que lo
+que el margen vale**. Por eso los aportes medidos son −0.0014, −0.0015 y −0.0019 en vez de +0.001.
+
+**Conclusión: la rama de arquitecturas queda cerrada con medición, no con argumento.** No es que no hayamos
+encontrado el modelo distinto: lo encontramos (r = 0.876) y tampoco alcanza.
+
 ### El bug que costó 24 h de cuota de GPU (2026-10-20)
 
 **Kaggle monta el mismo dataset en DOS rutas** y una es ~70 veces más lenta para leer:
@@ -551,6 +647,8 @@ Nuestro valid de 10 grupos es más fácil que el test (baseline 0.6498 ahí): co
 | **038** | 2026-10-19/20 | **Sprint 21 — el modelo final: train + valid.** 12.280 secuencias (+17,7 % de datos) dejando afuera las 200 de evaluación. Receta idéntica a la alumna LR, épocas fijas y SWA, sin elegir nada por valid. Semillas 2211 y 2212 | 12.280 | final_a SWA **0.6718** · final_b SWA **0.6746** (medidos en las 200 secuencias) | — | — | ~3 h c/u | Kaggle T4 | **+0.0002 contra los modelos viejos medidos en las mismas 200 secuencias** (promedio viejos 0.6730, promedio nuevos 0.6732). **Pero la prueba no tiene potencia para resolverlo:** la distancia entre las dos semillas es **0.0028**, más grande que el efecto que buscábamos (+0.002). Correlación entre las dos nuevas 0.9903, y de las nuevas con el ensamble viejo **0.9951**: son los mismos modelos. Aporte honesto al ensamble **+0.0000**. Se agregan 2 semillas más (2213, 2214) para poder armar un ensamble de 4 comparable al viejo y **medirlo en el leaderboard**, que es el único juez que queda |
 | **039** | 2026-10-20 | **Sprint 22 — el horizonte de aprendizaje** (`--chunk 1024` en vez de 512) | 10.607 | mejor 0.6834 / SWA **0.6836** | — | — | 128 min | Kaggle T4 | **+0.0002: ruido.** Duplicar hasta dónde puede aprender la red no cambia nada, igual que las features de memoria larga. La corrida de `--chunk 2048` murió a las 12 h por el bug de rutas de abajo, sin llegar a entrenar |
 | **040** | 2026-10-20 | **Sprint 23 — normalizar las entradas DENTRO de cada secuencia** (`--adapt-span` 2000 y 8000). Media y desvío móviles causales por secuencia, inicializados en los valores globales. Receta idéntica a la alumna LR, semillas 2231 y 2232 | 10.607 | *pendiente* | — | — | ~5 h c/u | Kaggle T4 | **Es lo más grande que encontramos sin probar.** 97 de las 112 features cambian de escala más de 2x entre secuencias (mediana 3,87x, peores 10x) y las normalizábamos globalmente. Verificado en la laptop: la variación de escala que ve la red baja de **4,07x a 1,09x**. Conecta con el oráculo de +0.047 de septiembre, atacándolo desde la entrada en vez de la salida. Criterio: 0.6855. Generador: `notebooks_kaggle/make_sprint23.py` |
+| **041** | 2026-10-21 | **Echo State Network** (reservorio de 400 unidades con pesos recurrentes **aleatorios y fijos**, radio espectral 0.95, fuga 0.3; solo se entrena la salida, que es una regresión lineal con ridge). 600 secuencias de train, evaluada en las mismas 200 de valid | 600 | **0.6099** | — | — | 8 min | **laptop, CPU** | **Correlación con el ensamble 0.8756: la más baja de cualquier competidor que construimos** (árboles 0.927, convolucional 0.978, LSTM 0.985). Pasa el umbral `s > S·r` por +0.0184, el margen más grande de todos, y aun así la **ganancia honesta es −0.0019**. Cierra la rama de arquitecturas: cinco familias distintas, correlaciones de 0.88 a 0.99, todas dan cero |
+| **042** | 2026-10-21 | **Sprint 24 — ensamble diverso de verdad.** 4 alumnos, cada uno con **datos distintos** (70 % de las secuencias, 7.424 de 10.607, semilla propia), **maestros distintos** (un par de los 4, no los 4 juntos) y **receta distinta** (lr, dropout, y uno GRU en vez de LSTM). 12 épocas, SWA 9–12 | 7.424 c/u | *pendiente* | — | — | ~1,7 h c/u | Kaggle T4 (cuenta `joaqfio`) | **Ataca la causa medida el mismo día:** nuestros 4 modelos están destilados de los mismos maestros, correlacionan 0.9854 y promediarlos vale +0.0021, contra +0.0051 de 4 modelos sin maestros compartidos. **Nunca habíamos variado nada entre los modelos salvo la semilla.** El puntaje individual va a ser más bajo (70 % de datos, 2 maestros): lo que decide es la correlación entre los cuatro. Si baja a ~0.95 con individual ~0.681, el ensamble va a ~0.690 → LB ~0.658 → puesto ~235. Generador: `notebooks_kaggle/make_sprint24.py` |
 | 019 | 2026-09-18/19 | **Sprint 3, 1.ª corrida: 5 alumnos destilados de Dswa+Eswa+F+Gswa** con soft targets precalculados (trainer v4) | 10.607 | **FALLÓ** (los 5) | | | | Kaggle T4 | `CUDA out of memory` en el precálculo (forward de 20.000 pasos de una vez). Fix: por trozos de 2.000. Relanzado con prueba de humo |
 
 ## Próximos pasos

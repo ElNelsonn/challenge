@@ -328,6 +328,73 @@ de esta familia puede predecir. Entrenar más modelos de este tipo, en cualquier
   **AUC 0.794**: el decil más probable tiene 34,9 % de filas puntuadas contra 0,5 % del más bajo. Entrenar pesando
   hacia esas filas es el único cambio que alinea lo que optimizamos con lo que nos puntúan (sprint 15A).
 
+## 2026-10-21 (mié, noche) — Segunda cuenta de Kaggle y el sprint 24 corriendo
+
+- **Nos quedamos sin GPU** (33,06 h usadas de 30; se repone el **sábado 24**, no el jueves como yo creía).
+  `kaggle quota` lo dice exacto. De paso: hay **20 h de TPU sin tocar**, aunque adaptar el entrenamiento a TPU
+  es trabajo y riesgo con LSTM y BPTT truncado.
+- **Joaquín conectó una segunda cuenta de Kaggle (`joaqfio`)** y compartió los 4 datasets como colaborador.
+  Verificado que los ve y que tiene las 30 h intactas. Entre las dos cuentas son 60 h semanales. La sesión de
+  la cuenta principal quedó respaldada para poder volver.
+- **Lancé el sprint 24: el ensamble diverso.** Cuatro alumnos donde por primera vez varío algo más que la
+  semilla — datos distintos (70 % cada uno), maestros distintos (un par en vez de los cuatro) y recetas
+  distintas (uno es GRU). Es lo único que ataca la causa que medimos hoy a la tarde.
+- Actualicé `HANDOFF.md`, que estaba al 29 de septiembre y ya no servía para retomar nada.
+
+## 2026-10-21 (mié, tarde) — Fuimos al leaderboard y cambió el criterio de todo el proyecto
+
+- Joaquín insistió: "si estamos 400, algo no cierra". Tenía razón. Fui al leaderboard completo por primera vez
+  en dos meses.
+- **El campo es densísimo: de #400 a #100 hay 0.0077.** Con nuestra brecha de 0.0323, eso significa que
+  **+0.002 en valid son 60 posiciones y +0.005 son 200**.
+- **Esto corrige un error de criterio mío que venía de semanas:** descarté sistemáticamente mejoras de +0.002
+  llamándolas ruido. Son ruido para *medirlas en valid*, no para la competencia.
+- **Otro dato duro: los del top 100 llevan entre 20 y 193 submissions. Nosotros 8**, con 5 por día
+  disponibles. Usan el leaderboard como instrumento; nosotros no.
+- Verifiqué que no nos faltaran datos (la página dice "N≈200 features" y usamos 112): el parquet tiene 118
+  columnas = 112 + 2 targets + 4 de control. No hay nada escondido.
+- **Y medí lo que nunca había medido: cuánto correlacionan entre sí los modelos SIN destilar.**
+
+      destilados    corr 0.9854   ensamble 0.6864   promediar vale +0.0021
+      sin destilar  corr 0.9635   ensamble 0.6845   promediar vale +0.0051
+
+  **Promediar vale 2,4 veces más sin destilar.** El mecanismo que sospechaba desde el sprint 15 queda
+  confirmado: destilar a todos de los mismos maestros nos costó la mitad del ensamble.
+- **Pero no alcanza como está:** los sin destilar que tenemos son del sprint 4 (8 épocas, receta vieja) y
+  arrancan 0.005 más abajo, así que su ensamble queda debajo del nuestro. La comparación justa —sin destilar
+  pero con la receta de ahora— nunca se hizo.
+- **Y lo más importante que salió de esto:** nunca variamos NADA entre los modelos del ensamble salvo la
+  semilla. Mismos datos, mismos maestros, misma receta. Las tres palancas estándar de diversidad (maestros
+  distintos por alumno, datos distintos por modelo, recetas distintas) están sin usar.
+
+## 2026-10-21 (mié) — La Echo State Network cierra la rama de arquitecturas
+
+- Joaquín me mostró el cuadro de tipos de redes neuronales y preguntó si las había considerado todas. No: de
+  ese cuadro habíamos probado cinco familias. La única que faltaba y tenía sentido era la **Echo State
+  Network**: una red recurrente con los pesos **aleatorios y fijos**, donde solo se entrena una regresión
+  lineal de salida. Interesaba justamente porque no se entrena, así que llega a otra solución por
+  construcción. Corrió **en la laptop, en CPU, en 8 minutos** — útil porque no tenemos GPU hasta el jueves.
+- **Dio 0.6099, con correlación 0.8756 contra el ensamble.** Esa correlación es **la más baja de cualquier
+  competidor que construimos en dos meses** (árboles 0.927, convolucional 0.978, LSTM 0.985).
+- **Pasa el umbral por el margen más grande de todos (+0.0184) y la ganancia honesta igual es −0.0019.**
+- **Y acá apareció la regularidad que explica todo el proyecto.** El criterio `s > S·r` se puede escribir
+  `s/r > S`. Midiendo las cuatro familias en las mismas 200 secuencias:
+
+      otra LSTM            s/r = 0.6762
+      LightGBM             s/r = 0.6892
+      XGBoost              s/r = 0.6903
+      Echo State Network   s/r = 0.6966
+      el ensamble          S   = 0.6755
+
+  **`s/r` es casi constante para cuatro familias radicalmente distintas, y el ensamble está justo en el medio
+  de ese rango.** Cada modelo que logramos construir cae sobre la línea de empate: los más distintos son
+  peores en la misma proporción, y las dos cosas se cancelan.
+- Segundo efecto que completa el cuadro: aunque el margen sea nominalmente positivo, **elegir honestamente
+  cuánto peso darle al modelo nuevo cuesta más ruido que lo que el margen vale.** Por eso los aportes medidos
+  dan negativos en vez de +0.001.
+- **La rama de arquitecturas queda cerrada con una medición.** No es que no hayamos encontrado el modelo
+  distinto: lo encontramos (r = 0.876) y tampoco alcanza.
+
 ## 2026-10-20 (mar) — Un bug mío quemó 24 h de cuota de GPU
 
 - **Las dos corridas murieron en el límite de 12 h de Kaggle sin entrenar una sola época.** Se pasaron 700
