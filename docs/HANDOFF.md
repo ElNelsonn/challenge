@@ -97,12 +97,12 @@ solo; en una competencia normal promediar 4 modelos vale +0.005 a +0.015. Medido
 | 4 sin destilar (sprint 4) | 0.9635 | **+0.0051** |
 
 **Nunca variamos nada entre los modelos del ensamble salvo la semilla:** mismos datos, mismos maestros, misma
-receta. Eso es lo que ataca el sprint 24.
+receta. Eso es lo que atacó el sprint 24 — **y falló. El diagnóstico de arriba está refutado; ver abajo.**
 
-## 5. Qué está corriendo (2026-10-21)
+## 5. El sprint 24 y por qué cierra la rama del ensamble (2026-10-22)
 
-**Sprint 24 — ensamble diverso de verdad** (cuenta `joaqfio`, 4 corridas de ~1,7 h). Las tres palancas de
-diversidad, las tres sin usar hasta hoy:
+**Sprint 24 — ensamble diverso de verdad** (cuenta `joaqfio`, 4 corridas de ~1,7 h). Movió las tres palancas de
+diversidad a la vez, las tres sin usar hasta ese día:
 
 | | datos | maestros | receta |
 |---|---|---|---|
@@ -114,17 +114,73 @@ diversidad, las tres sin usar hasta hoy:
 Cada uno ve 7.424 de las 10.607 secuencias; comparten el 70 % de a pares y entre los cuatro cubren el 99 %.
 Generador: `notebooks_kaggle/make_sprint24.py`.
 
-**Cómo leer el resultado:** el puntaje individual de cada uno va a ser MÁS BAJO que 0.683 (ven 70 % de los
-datos y 2 maestros). Eso es lo buscado y no es malo. **Lo que decide es la correlación entre los cuatro**, que
-se mide en la laptop con `model/submission/combine_local.py`. Si baja de 0.985 a ~0.95 manteniendo el
-individual cerca de 0.681, el ensamble se va a ~0.690 → leaderboard ~0.658 → puesto ~235.
+Corrieron **tres de los cuatro**; `div_b` quedó cancelado porque se agotó la cuota.
 
-**Pendiente, sin correr:** la **normalización adaptativa por secuencia** (`--adapt-span`, sprint 23). 97 de las
+**RESULTADO (medido sobre las 3.528.273 filas puntuadas, `analisis/s24_final.py` y `analisis/s24_cuaterna.py`).**
+Qué palanca bajó la correlación y qué palanca no:
+
+| par | qué cambia entre ellos | correlación |
+|---|---|---|
+| `div_a` – `div_c` | datos, maestros, lr — **las dos LSTM** | **0.9849** |
+| `div_a` – `div_d` | lo mismo **+ LSTM contra GRU** | **0.9769** |
+| `div_c` – `div_d` | lo mismo **+ LSTM contra GRU** | **0.9768** |
+| los 4 viejos entre sí | solo la semilla | 0.9860 |
+
+**Cambiar datos y maestros no mueve la correlación. Cambiar la arquitectura sí.** Eso refuta la hipótesis con la
+que se lanzó el sprint: los 4 maestros son ellos mismos casi idénticos (~0.98 entre sí), así que darle a cada
+alumno un par distinto es darle **el mismo objetivo**.
+
+**Y lo grave: los tres pasan la regla `s > S·r` con margen y la ganancia es cero.**
+
+| modelo | `s` | `r` con el ensamble | `S·r` | margen | la regla dice |
+|---|---|---|---|---|---|
+| `div_a` | 0.6829 | 0.9902 | 0.6793 | +0.0035 | PASA |
+| `div_c` | 0.6819 | 0.9900 | 0.6792 | +0.0027 | PASA |
+| `div_d` | 0.6777 | 0.9835 | 0.6747 | +0.0030 | PASA |
+
+Probadas **las 35 cuaternas** de los 7 modelos (cuatro es lo que entra en los 60 min de inferencia):
+
+| ensamble | valid | leaderboard |
+|---|---|---|
+| mejor cuaterna: `div_a`+LR+long+b256 | 0.6861 | 0.6538 |
+| **el nuestro: LR+LA+long+b256** | **0.6860** | **0.6537** |
+| **ganancia real** | **+0.0000** | |
+
+Con pesos no uniformes buscados a sorteo: **+0.0000**.
+
+**⚠️ LA REGLA `s > S·r` NO SIRVE COMO CRITERIO DE DECISIÓN.** Es la segunda vez que falla en la misma dirección:
+la Echo State Network (exp 041) pasaba por +0.0184 y su ganancia real fue −0.0019. Sale de suponer que los
+errores de los modelos son intercambiables, y acá no lo son. **El único criterio válido es promediar y medir.**
+Las decisiones tomadas con la regla en sprints anteriores hay que releerlas con eso en mente.
+
+**Con esto se cierra la rama del ensamble**, la última abierta después de la de arquitecturas (la Echo State
+Network, exp 041). El mapa completo de lo intentado: cambiar la **arquitectura** baja la correlación hasta 0.88
+y da cero; cambiar **datos, maestros y receta** no la baja y da cero.
+
+**Hallazgo lateral que vale por sí solo:** `div_a` sacó 0.6829 con el **70 % de los datos y 2 maestros** contra
+0.6834 del equivalente con el 100 % y 4. **El volumen de datos y la cantidad de maestros casi no importan**, lo
+mismo que ya había dicho la prueba de train+valid (+17,7 % de datos = 0.0000). Lo que falta no es más de lo
+mismo: es **información que todavía no le damos a la red.**
+
+**EL ÚNICO FRENTE ABIERTO, y lo primero que hay que correr cuando haya GPU:** la **normalización adaptativa por secuencia** (`--adapt-span`, sprint 23). 97 de las
 112 features cambian de escala más de 2x entre secuencias (mediana 3,87x, las peores 10x) y las normalizábamos
 con un valor global. Implementado y verificado en local: la variación que ve la red baja de 4,07x a 1,09x.
 Las dos corridas murieron por el bug de rutas (ver EXPERIMENTS.md) y están listas en
 `notebooks_kaggle/connectome_sprint23_adapt{2000,8000}.ipynb`.
 
-**Trampa de Kaggle que costó 24 h de cuota:** Kaggle monta el mismo dataset en DOS rutas y una es ~70 veces más
-lenta (0,06 s por secuencia contra 4,5 s). **Usar siempre la que contiene `/datasets/`.** Todos los generadores
-nuevos ya la eligen explícitamente e imprimen cuál usaron.
+**Trampa de Kaggle que costó 24 h de cuota, y la corrección del diagnóstico:** dos corridas de 12 h murieron
+sin entrenar porque la lectura del parquet iba a 4,5 s por secuencia en vez de 0,06 s. Primero lo atribuí a que
+Kaggle monta el dataset en dos rutas y una es lenta, y los generadores pasaron a preferir la que contiene
+`/datasets/`. **Ese diagnóstico era incorrecto:** `div_a` y `div_b` tomaron los dos la ruta "rápida" y uno igual
+corrió a 6,6 s por secuencia. La causa real es **qué máquina te toca** (si el dataset quedó cacheado en su disco
+local o no), y no se puede elegir. **El arreglo que sí sirve es la guarda de velocidad** que ya traen los
+generadores desde el sprint 24: lee 15 secuencias al arrancar y aborta en 1 minuto si tarda más de 1 s cada una,
+en vez de quemar 12 h de cuota.
+
+      pf = pq.ParquetFile(TRAIN.split()[0])
+      t0 = time.time()
+      for g in range(15): pf.read_row_group(g, use_threads=False)
+      seg = (time.time() - t0) / 15
+      assert seg < 1.0, f'LECTURA LENTA: {seg:.1f} s por secuencia...'
+
+**Cuota de GPU: 0.00 h en las dos cuentas, se repone el 2026-10-24.**

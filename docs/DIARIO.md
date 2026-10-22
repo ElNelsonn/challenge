@@ -328,6 +328,43 @@ de esta familia puede predecir. Entrenar más modelos de este tipo, en cualquier
   **AUC 0.794**: el decil más probable tiene 34,9 % de filas puntuadas contra 0,5 % del más bajo. Entrenar pesando
   hacia esas filas es el único cambio que alinea lo que optimizamos con lo que nos puntúan (sprint 15A).
 
+## 2026-10-22 (jue) — El sprint 24 da cero y me tira abajo la regla con la que decidí todo el proyecto
+
+- Corrieron tres de los cuatro (`div_b` quedó cancelado: se agotó la cuota). Primero medí solo `div_a` y `div_c`
+  y vi que la correlación casi no bajaba. **Con `div_d` adentro el cuadro cambia, y vale separarlo bien:**
+
+      div_a - div_c  (datos, maestros y lr distintos, las dos LSTM)   0.9849
+      div_a - div_d  (lo mismo + LSTM contra GRU)                     0.9769
+      div_c - div_d  (lo mismo + LSTM contra GRU)                     0.9768
+      los 4 viejos entre si (solo cambia la semilla)                  0.9860
+
+  **Cambiar datos y maestros no mueve nada. Cambiar la arquitectura sí.** Todo el 0.0065 de caída lo puso el GRU.
+- Eso **refuta la hipótesis con la que lancé el sprint**: dije que la correlación de 0.986 venía de compartir los
+  maestros. No. **Los 4 maestros correlacionan ~0.98 entre sí**, así que darle a cada alumno un par distinto es
+  darle el mismo objetivo.
+- **Y lo serio del día: los tres pasan la regla `s > S·r` con margen y la ganancia es cero.**
+
+      div_a  s 0.6829  r 0.9902  S*r 0.6793  margen +0.0035  PASA
+      div_c  s 0.6819  r 0.9900  S*r 0.6792  margen +0.0027  PASA
+      div_d  s 0.6777  r 0.9835  S*r 0.6747  margen +0.0030  PASA
+
+  Probé **las 35 cuaternas** de los 7 modelos (cuatro es lo que entra en los 60 min). La mejor da **0.6861**
+  contra nuestro **0.6860**: **+0.0000**. Con pesos buscados a sorteo, +0.0000 también.
+- **Es la segunda vez que la regla falla en la misma dirección**, así que no es casualidad: la Echo State Network
+  pasaba por +0.0184 y la ganancia real fue −0.0019. La regla supone que los errores de los modelos son
+  intercambiables y acá no lo son. **De ahora en más el único criterio que uso es promediar y medir.** Hay que
+  releer con eso en mente las decisiones que tomé con la regla en sprints anteriores.
+- **Se cierra la rama del ensamble**, la última abierta. El mapa: cambiar la arquitectura baja la correlación
+  hasta 0.88 y da cero; cambiar datos, maestros y receta no la baja y da cero.
+- **Lo que sí quedó, y vale por sí solo:** `div_a` sacó 0.6829 con el 70 % de los datos y 2 maestros, contra
+  0.6834 del equivalente con el 100 % y 4. **El volumen de datos y la cantidad de maestros casi no importan.**
+  Coincide con la prueba de train+valid del lunes (+17,7 % de datos = 0.0000). Lo que falta no es más de lo
+  mismo: es **información que todavía no le damos a la red**.
+- Queda **una sola cosa abierta**: la normalización adaptativa por secuencia (exp 040, sprint 23), que no agrega
+  otro modelo sino que cambia **qué ve** la red. Verificada en la laptop desde el lunes (la variación de escala
+  que ve la red baja de 4,07x a 1,09x) y nunca entrenada.
+- **Cuota de GPU: 0.00 h en las dos cuentas, se repone el 2026-10-24.**
+
 ## 2026-10-21 (mié, noche) — Segunda cuenta de Kaggle y el sprint 24 corriendo
 
 - **Nos quedamos sin GPU** (33,06 h usadas de 30; se repone el **sábado 24**, no el jueves como yo creía).

@@ -89,7 +89,24 @@ def buscador(maestros):
             "VALID = buscar('valid.parquet')\n"
             f"TEACHERS = ' '.join(buscar(n) for n in {maestros})\n"
             f"print('maestros de este alumno:', {[m.split('_')[0] + '/' + m.split('_')[1] for m in maestros]})\n"
-            "os.makedirs('/kaggle/working/results', exist_ok=True); print('Inputs OK')\n")
+            "os.makedirs('/kaggle/working/results', exist_ok=True)\n"
+            "\n"
+            "# CONTROL DE VELOCIDAD DE LECTURA. Kaggle a veces monta el dataset sin cache local en la maquina\n"
+            "# que te toco, y leer pasa de 0.06 a 6 segundos por secuencia. Cuando eso pasa, la corrida se come\n"
+            "# las 12 h de limite SOLO precalculando los targets del maestro, sin entrenar una sola epoca.\n"
+            "# Ya nos costo tres corridas y 35 h de cuota. Medirlo cuesta 20 segundos.\n"
+            "import pyarrow.parquet as pq\n"
+            "pf = pq.ParquetFile(TRAIN.split()[0])\n"
+            "t0 = time.time()\n"
+            "for g in range(15):\n"
+            "    pf.read_row_group(g, use_threads=False)\n"
+            "seg = (time.time() - t0) / 15\n"
+            "print(f'velocidad de lectura: {seg:.2f} s por secuencia '\n"
+            "      f'(rapida < 0.5 | esta corrida necesita ~{seg*7424/3600:.1f} h solo para leer train una vez)')\n"
+            "assert seg < 1.0, (f'LECTURA LENTA: {seg:.1f} s por secuencia. Kaggle monto el dataset sin cache en '\n"
+            "                   f'esta maquina y la corrida moriria en el limite de 12 h sin entrenar nada. '\n"
+            "                   f'Abortado a proposito. Volver a lanzar: es suerte de maquina, no un error del codigo.')\n"
+            "print('Inputs OK')\n")
 
 
 for nombre, (cell, hid, lr, drop, maestros, seed) in CORRIDAS.items():
