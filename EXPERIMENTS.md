@@ -162,6 +162,66 @@ usarlos solo ahí. Dos cortes, los dos disponibles en inferencia, sobre 388.058 
 hay región donde convenga darles más peso. Un peso por quintil elegido honestamente da **−0.0037**, peor que
 el peso único (−0.0014): más libertad para elegir = más sesgo, que es la misma lección de siempre.
 
+### El +0.047 de septiembre es un oráculo, no una puerta (2026-10-24)
+
+Desde el 2026-09-26 el número más grande del proyecto era este: **si supiéramos la escala de cada secuencia, el
+ensamble pasaría de 0.6853 a 0.7053. +0.047**, seis veces la distancia al puesto 1. Lo había cerrado como
+imposible probando **una** sola cosa —estimar la escala desde las propias predicciones— y quedó anotado como
+"el techo más grande que existe". Esta vez lo abrí de verdad, en la laptop, y resultó que **estaba mal
+etiquetado desde el principio**.
+
+**Primero: no es escala.** El oráculo de septiembre aplicaba un factor **y un corrimiento** por secuencia. Si se
+aplica solo el factor que iguala la escala del target (σ_y/σ_q), el resultado es:
+
+| oráculo | efecto |
+|---|---|
+| igualar la escala exacta (σ_y/σ_q) | **−0.0566** |
+| solo el factor óptimo de regresión | −0.0314 |
+| solo el corrimiento óptimo | +0.0046 |
+| **factor + corrimiento** | **+0.0470** |
+
+**Igualar escalas empeora.** El +0.047 sale de la **interacción** entre las dos piezas, no de ninguna de las dos.
+Y la pieza que de verdad manda es el corrimiento, que es `b_s = my_s − a_s·mq_s`, donde `my_s` es el sesgo
+direccional de los targets de la secuencia: a dónde se movió en agregado. Eso es casi saber la respuesta.
+
+**Segundo: las dos piezas son impredecibles.** Con un resumen de las primeras 2.000 filas de cada secuencia
+(media, desvío y variación media de las 112 features, más 6 números de nuestras propias predicciones, que en
+inferencia también tenemos), ridge ajustado en la mitad de las secuencias y medido en la otra:
+
+| qué se intenta predecir | R² fuera de muestra |
+|---|---|
+| el factor `a_s` | **+0.003** |
+| el corrimiento `b_s` | **+0.003** |
+| la escala del target `σ_y(s)` | +0.20 / +0.26 (solo +0.08 con las primeras 2.000 filas) |
+
+Y aplicado de verdad, nada mejora: el mejor caso es +0.0001, que es el límite donde la corrección se apaga.
+Para ver si alguna de las dos mitades bloquea a la otra, las combiné con el oráculo:
+
+| | resultado |
+|---|---|
+| factor ORÁCULO + corrimiento predicho | −0.0316 |
+| factor predicho + corrimiento ORÁCULO | +0.0035 |
+
+Ninguna mitad sola llega a nada. **El +0.047 necesita las dos piezas exactas a la vez: es un oráculo, no una
+puerta.** La conclusión de septiembre era correcta; el motivo era otro, y ahora está medido.
+
+**Tercero, y esto sí es un hallazgo: la confianza por secuencia se puede predecir, y bien.** La correlación
+`r_s` de nuestro ensamble dentro de cada secuencia (mediana 0.702, p10 0.333, p90 0.865 — varía muchísimo) sale
+con **R² = +0.51 solo con las features del libro y +0.57 agregando el resumen de nuestras propias
+predicciones**, fuera de muestra. Es la señal más fuerte que encontramos en todo el proyecto: **sabemos de
+antemano en qué secuencias vamos a predecir bien.**
+
+Lo que no sabemos es qué hacer con eso. Usarla como multiplicador —encoger las predicciones donde la confianza
+es baja— **empeora, y empeora incluso con el oráculo de `r_s` (−0.0244)**. Tiene sentido con la métrica que nos
+puntúan: la WP global premia mantener una escala consistente entre secuencias, y encoger unas y no otras rompe
+esa consistencia. Queda anotado como lo único con señal fuerte sin explotar.
+
+**Consecuencia para el sprint 23, y es una corrección a lo que escribí el 2026-10-20.** La ficha del exp 040
+dice que la normalización adaptativa "conecta con el oráculo de +0.047, atacándolo desde la entrada en vez de la
+salida". **Esa conexión es falsa**: el oráculo no es de escala, así que el sprint 23 no hereda ese techo. Su
+justificación queda en pie por sí sola y es más modesta —97 de las 112 features cambian de escala más de 2x
+entre secuencias y eso le dificulta el aprendizaje a la red— pero hay que leerla sin el +0.047 detrás.
+
 ### La regla `s > S·r` falla, y el sprint 24 es la prueba (2026-10-22)
 
 Corrimos tres de los cuatro alumnos del sprint 24 (`div_b` quedó cancelado por falta de cuota). Cada uno vio
@@ -713,9 +773,10 @@ Nuestro valid de 10 grupos es más fácil que el test (baseline 0.6498 ahí): co
 | **037** | 2026-10-18 | **Sprint 20 — XGBoost** (`--lib xgboost`, por niveles, max_depth 6 ≈ 64 hojas). Todo lo demás idéntico a LightGBM | 10.607 | **0.6405** (t0 0.6398, t1 0.6412) | — | — | ~1,5 h | Kaggle CPU | **+0.0015 sobre LightGBM: empate.** Correlación con el ensamble **0.9279** contra 0.9271 de LightGBM: igual. **Y entre ellos correlacionan 0.9934**, o sea que son el mismo modelo con otra implementación. Aporte honesto **−0.0015**; promediando los dos árboles, −0.0015. **La rama de árboles queda cerrada con medición, no con argumento.** La 1.ª corrida murió por memoria: `xgb.DMatrix` guarda 8 bytes por número aunque la matriz sea densa (16 GB); arreglado con `xgb.QuantileDMatrix` (1 byte, ~2 GB) |
 | **038** | 2026-10-19/20 | **Sprint 21 — el modelo final: train + valid.** 12.280 secuencias (+17,7 % de datos) dejando afuera las 200 de evaluación. Receta idéntica a la alumna LR, épocas fijas y SWA, sin elegir nada por valid. Semillas 2211 y 2212 | 12.280 | final_a SWA **0.6718** · final_b SWA **0.6746** (medidos en las 200 secuencias) | — | — | ~3 h c/u | Kaggle T4 | **+0.0002 contra los modelos viejos medidos en las mismas 200 secuencias** (promedio viejos 0.6730, promedio nuevos 0.6732). **Pero la prueba no tiene potencia para resolverlo:** la distancia entre las dos semillas es **0.0028**, más grande que el efecto que buscábamos (+0.002). Correlación entre las dos nuevas 0.9903, y de las nuevas con el ensamble viejo **0.9951**: son los mismos modelos. Aporte honesto al ensamble **+0.0000**. Se agregan 2 semillas más (2213, 2214) para poder armar un ensamble de 4 comparable al viejo y **medirlo en el leaderboard**, que es el único juez que queda |
 | **039** | 2026-10-20 | **Sprint 22 — el horizonte de aprendizaje** (`--chunk 1024` en vez de 512) | 10.607 | mejor 0.6834 / SWA **0.6836** | — | — | 128 min | Kaggle T4 | **+0.0002: ruido.** Duplicar hasta dónde puede aprender la red no cambia nada, igual que las features de memoria larga. La corrida de `--chunk 2048` murió a las 12 h por el bug de rutas de abajo, sin llegar a entrenar |
-| **040** | 2026-10-20 | **Sprint 23 — normalizar las entradas DENTRO de cada secuencia** (`--adapt-span` 2000 y 8000). Media y desvío móviles causales por secuencia, inicializados en los valores globales. Receta idéntica a la alumna LR, semillas 2231 y 2232 | 10.607 | *pendiente* | — | — | ~5 h c/u | Kaggle T4 | **Es lo más grande que encontramos sin probar.** 97 de las 112 features cambian de escala más de 2x entre secuencias (mediana 3,87x, peores 10x) y las normalizábamos globalmente. Verificado en la laptop: la variación de escala que ve la red baja de **4,07x a 1,09x**. Conecta con el oráculo de +0.047 de septiembre, atacándolo desde la entrada en vez de la salida. Criterio: 0.6855. Generador: `notebooks_kaggle/make_sprint23.py` |
+| **040** | 2026-10-20 | **Sprint 23 — normalizar las entradas DENTRO de cada secuencia** (`--adapt-span` 2000 y 8000). Media y desvío móviles causales por secuencia, inicializados en los valores globales. Receta idéntica a la alumna LR, semillas 2231 y 2232 | 10.607 | *pendiente* | — | — | ~5 h c/u | Kaggle T4 | **Es lo más grande que encontramos sin probar.** 97 de las 112 features cambian de escala más de 2x entre secuencias (mediana 3,87x, peores 10x) y las normalizábamos globalmente. Verificado en la laptop: la variación de escala que ve la red baja de **4,07x a 1,09x**. ~~Conecta con el oráculo de +0.047 de septiembre, atacándolo desde la entrada en vez de la salida.~~ **(2026-10-24: esa conexión es FALSA, el oráculo no es de escala. Ver exp 043. La justificación del sprint 23 queda sola y es más modesta.)** Criterio: 0.6855. Generador: `notebooks_kaggle/make_sprint23.py` |
 | **041** | 2026-10-21 | **Echo State Network** (reservorio de 400 unidades con pesos recurrentes **aleatorios y fijos**, radio espectral 0.95, fuga 0.3; solo se entrena la salida, que es una regresión lineal con ridge). 600 secuencias de train, evaluada en las mismas 200 de valid | 600 | **0.6099** | — | — | 8 min | **laptop, CPU** | **Correlación con el ensamble 0.8756: la más baja de cualquier competidor que construimos** (árboles 0.927, convolucional 0.978, LSTM 0.985). Pasa el umbral `s > S·r` por +0.0184, el margen más grande de todos, y aun así la **ganancia honesta es −0.0019**. Cierra la rama de arquitecturas: cinco familias distintas, correlaciones de 0.88 a 0.99, todas dan cero |
 | **042** | 2026-10-21 | **Sprint 24 — ensamble diverso de verdad.** 4 alumnos, cada uno con **datos distintos** (70 % de las secuencias, 7.424 de 10.607, semilla propia), **maestros distintos** (un par de los 4, no los 4 juntos) y **receta distinta** (lr, dropout, y uno GRU en vez de LSTM). 12 épocas, SWA 9–12 | 7.424 c/u | **0.6829** / **0.6819** / **0.6777** | — | — | ~1,7 h c/u | Kaggle T4 (cuenta `joaqfio`) | **Ataca la causa medida el mismo día:** nuestros 4 modelos están destilados de los mismos maestros, correlacionan 0.9854 y promediarlos vale +0.0021, contra +0.0051 de 4 modelos sin maestros compartidos. **Nunca habíamos variado nada entre los modelos salvo la semilla.** El puntaje individual va a ser más bajo (70 % de datos, 2 maestros): lo que decide es la correlación entre los cuatro. Si baja a ~0.95 con individual ~0.681, el ensamble va a ~0.690 → LB ~0.658 → puesto ~235. Generador: `notebooks_kaggle/make_sprint24.py`. **RESULTADO: corrieron 3 de 4 (`div_b` cancelado por cuota). La correlación bajó 0.0065, pero TODO lo puso el cambio de arquitectura de `div_d` (GRU): el par de LSTM con datos y maestros distintos quedó en 0.9849 contra 0.9860. Los tres PASAN la regla `s > S·r` con margen y la mejor cuaterna de los 7 gana +0.0000. Ver la sección de abajo: la regla falla.** |
+| **043** | 2026-10-24 | **¿El +0.047 de septiembre se puede alcanzar?** Descomposición del oráculo afín por secuencia y predicción de cada pieza desde las features (resumen de las primeras 2.000 filas: media, desvío y variación media de las 112, más 6 números de nuestras propias predicciones). Ridge ajustado en 936 secuencias, medido en 937 | — | **no se alcanza** | — | — | 6 min | **laptop, CPU** | **El +0.047 es un oráculo conjunto y sus dos piezas son impredecibles por separado: R² = +0.003 cada una.** Oráculo del factor + corrimiento predicho: −0.0316. Factor predicho + oráculo del corrimiento: +0.0035. Y el oráculo de *igualar la escala* (σ_y/σ_q) da **−0.0566**: igualar escalas empeora, así que el +0.047 nunca fue un problema de escala. **Lo que sí se predice es la confianza por secuencia r_s, R² = +0.57 fuera de muestra** —la señal más fuerte del proyecto— pero usarla como multiplicador empeora incluso con el oráculo (−0.0244). Scripts: `analisis/escala_paso{2,3,4}.py` |
 | 019 | 2026-09-18/19 | **Sprint 3, 1.ª corrida: 5 alumnos destilados de Dswa+Eswa+F+Gswa** con soft targets precalculados (trainer v4) | 10.607 | **FALLÓ** (los 5) | | | | Kaggle T4 | `CUDA out of memory` en el precálculo (forward de 20.000 pasos de una vez). Fix: por trozos de 2.000. Relanzado con prueba de humo |
 
 ## Próximos pasos

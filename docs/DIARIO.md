@@ -328,6 +328,40 @@ de esta familia puede predecir. Entrenar más modelos de este tipo, en cualquier
   **AUC 0.794**: el decil más probable tiene 34,9 % de filas puntuadas contra 0,5 % del más bajo. Entrenar pesando
   hacia esas filas es el único cambio que alinea lo que optimizamos con lo que nos puntúan (sprint 15A).
 
+## 2026-10-24 (sáb) — Abrí el número más grande del proyecto y era un oráculo
+
+- Se repuso la cuota (30 h). **Antes de lanzar nada revisé los notebooks del sprint 23 y les faltaba la guarda
+  de velocidad de lectura** —son del 20 de octubre, anteriores al arreglo—, así que la porté y los regeneré.
+  Sin eso había riesgo real de repetir las dos corridas que murieron sin entrenar. Los dos corriendo en GPU.
+- Verifiqué además que el kernel de inferencia **pueda reproducir** la normalización adaptativa antes de gastar
+  cuota: normaliza en float (la cuantización int8 es de los pesos), así que se puede implementar y cuesta ~1 min
+  de los 19 que sobran del presupuesto. No es un bloqueo, pero es trabajo pendiente.
+- Y mientras entrenaban, en la laptop, fui a buscar el número que tenía anotado desde el 26 de septiembre como
+  "el techo más grande que existe": **si supiéramos la escala de cada secuencia, +0.047**. Lo había cerrado
+  probando una sola cosa. **Estaba mal etiquetado desde el principio.**
+- **No es escala.** El oráculo de septiembre aplicaba factor Y corrimiento por secuencia. Separándolos:
+
+      igualar la escala exacta (sigma_y/sigma_q)   -0.0566   <- igualar escalas EMPEORA
+      solo el factor optimo de regresion           -0.0314
+      solo el corrimiento optimo                   +0.0046
+      factor + corrimiento                         +0.0470
+
+  El +0.047 sale de la interacción, y la pieza que manda es el corrimiento, que es el sesgo direccional de los
+  targets de la secuencia: casi saber la respuesta.
+- **Y las dos piezas son impredecibles desde las features: R² = +0.003 cada una**, fuera de muestra. Combinadas
+  con el oráculo tampoco: factor oráculo + corrimiento predicho da −0.0316; al revés, +0.0035. **Es un oráculo,
+  no una puerta.** La conclusión de septiembre era correcta, el motivo era otro, y ahora está medido.
+- **Lo que sí salió, y es el hallazgo del día: la confianza por secuencia se predice bien.** La correlación de
+  nuestro ensamble dentro de cada secuencia varía muchísimo (mediana 0.70, p10 0.33, p90 0.87) y se predice con
+  **R² = 0.51 solo con el libro y 0.57 agregando nuestras propias predicciones**. Es la señal más fuerte de todo
+  el proyecto: **sabemos de antemano en qué secuencias vamos a andar bien.**
+- Lo que no sé es qué hacer con eso. Usarla para encoger las predicciones de las secuencias malas **empeora, y
+  empeora incluso con el oráculo**. Tiene sentido: la WP global premia escala consistente entre secuencias.
+  Queda anotado como lo único con señal fuerte sin explotar.
+- **Y me obliga a corregir lo que escribí el 20:** dije que el sprint 23 "ataca el oráculo de +0.047 desde la
+  entrada". Es falso, el oráculo no es de escala. El sprint 23 sigue teniendo sentido por sí solo —la red ve
+  features cuya escala varía 4x entre secuencias— pero es una apuesta más modesta de lo que la había vendido.
+
 ## 2026-10-22 (jue) — El sprint 24 da cero y me tira abajo la regla con la que decidí todo el proyecto
 
 - Corrieron tres de los cuatro (`div_b` quedó cancelado: se agotó la cuota). Primero medí solo `div_a` y `div_c`

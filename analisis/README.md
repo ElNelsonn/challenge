@@ -13,6 +13,10 @@ apunta a un directorio temporal de la sesión en la que se corrieron.
 
 | script | qué contesta | hallazgo |
 |---|---|---|
+| `escala_paso4.py` | ¿se puede alcanzar el +0.047 de septiembre? | **No: es un oráculo conjunto y sus dos piezas dan R² = +0.003 cada una.** Correr este primero |
+| `escala_paso3.py` | ¿de dónde sale el +0.047, y se predice la confianza por secuencia? | no es de escala (igualarla da −0.0566); **la confianza `r_s` sí se predice, R² = +0.57**, pero aplicarla empeora |
+| `escala_paso2.py` | la escala del target por secuencia, aplicada a las predicciones | igualar la escala exacta **empeora** (−0.0566); confirma el +0.047 del oráculo factor+corrimiento |
+| `escala_predecible.py` | piloto rápido: ¿tiene señal la escala del target? | R² 0.20–0.26 con la secuencia completa, 0.08–0.14 causal |
 | `s24_cuaterna.py` | ¿alguna cuaterna de los 7 modelos le gana a la nuestra? ¿se cumple `s > S·r`? | **La regla `s > S·r` no sirve: los 3 nuevos la pasan con margen y la ganancia real es +0.0000** |
 | `s24_final.py` | ¿qué palanca de diversidad baja la correlación entre modelos? | datos y maestros no la mueven; la arquitectura sí (0.977 contra 0.985) |
 | `s24_analisis.py` | la primera versión, con dos modelos de tres | quedó para referencia; `s24_final.py` la reemplaza |
