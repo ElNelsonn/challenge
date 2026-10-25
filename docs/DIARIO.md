@@ -328,6 +328,33 @@ de esta familia puede predecir. Entrenar más modelos de este tipo, en cualquier
   **AUC 0.794**: el decil más probable tiene 34,9 % de filas puntuadas contra 0,5 % del más bajo. Entrenar pesando
   hacia esas filas es el único cambio que alinea lo que optimizamos con lo que nos puntúan (sprint 15A).
 
+## 2026-10-25 (dom, tarde) — Joaquín preguntó lo que correspondía y la respuesta es exhaustiva
+
+- Preguntó: "¿no deberíamos ensamblar todos los modelos que ya tenemos?". **Tenía razón en que nunca se había
+  hecho bien.** Todas mis búsquedas comparaban cuaternas de modelos parecidos; en el disco había **58 archivos
+  de predicciones de 38 corridas distintas**, de todas las ramas del proyecto.
+- **Y de paso corregí un error de encuadre que arrastrábamos: el presupuesto no se mide en "4 modelos", se mide
+  en minutos, y no estábamos cerca del límite.** Calibrando con la submission medida de 41m52s: una LSTM 128x2
+  cuesta 6,0 min, una 256x2 cuesta 21,2, y nuestra cuaterna son ~40 de los 60. **Nos sobran 20 minutos: caben
+  dos o tres modelos más.** El cuello nunca fue la inferencia.
+- **La primera corrida de la búsqueda dio +0.0009 y me entusiasmé mal.** Tenía dos defectos: eligió dos
+  checkpoints del mismo modelo (`student_mask` best y swa, que es una sola corrida) y, peor, eligió la
+  combinación mirando las mismas filas con las que la medía.
+- **Validado honestamente —eligiendo en la mitad de las secuencias y midiendo en la otra— el +0.0009 se
+  evapora:**
+
+      mejor sin presupuesto (10 modelos, 73 min)   -0.0001
+      mejor en 55 min       (9 modelos, 52 min)    -0.0004
+      nuestra cuaterna                             (la referencia)
+
+- **Y el último rincón, que de verdad no estaba probado: reemplazar una red por un árbol o por la ESN.** Lo
+  medido antes era *agregarlos* como quinto. Sacar una red y poner uno de ellos es distinto, porque correlacionan
+  mucho más bajo (árboles 0.928, ESN 0.876 contra 0.99 de las redes) y son más baratos. **Las ocho opciones
+  salieron negativas**, de −0.0009 (−LA +xgboost) a −0.0029.
+- **Conclusión: la cuaterna que tenemos ya es la mejor que se puede armar con dos meses de modelos.** Y esto
+  cierra la pregunta del ensamble de forma exhaustiva, no por muestreo: no es que no probamos las combinaciones,
+  es que las probamos todas.
+
 ## 2026-10-25 (dom) — El sprint 23 cierra el último frente, y confirma la hipótesis sin dar puntos
 
 - `adapt8000` terminó: **0.6801** con SWA, 0.6794 el mejor. Por debajo de nuestros cuatro (0.6823–0.6843).

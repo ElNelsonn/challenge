@@ -162,6 +162,64 @@ usarlos solo ahí. Dos cortes, los dos disponibles en inferencia, sobre 388.058 
 hay región donde convenga darles más peso. Un peso por quintil elegido honestamente da **−0.0037**, peor que
 el peso único (−0.0014): más libertad para elegir = más sesgo, que es la misma lección de siempre.
 
+### Ensamblamos TODO lo del proyecto, con presupuesto, y nuestra cuaterna ya era la mejor (2026-10-25)
+
+Joaquín preguntó lo que correspondía: "¿no deberíamos ensamblar todos los modelos que ya tenemos?". Nunca se
+había hecho bien. Todas las búsquedas anteriores comparaban cuaternas de modelos **parecidos**; en el disco
+había **58 archivos de predicciones de 38 corridas distintas**, de todas las ramas: alumnas destiladas, los
+seis sin destilar del sprint 4, cinco convolucionales (TCN), la máscara, `seqwp`, `cross`, `ema`, `half1/half2`,
+los grandes de 192 y 256, los del sprint 21, los `div` del 24, la normalización adaptativa, los árboles
+(LightGBM y XGBoost) y la Echo State Network.
+
+**Primero, un error de encuadre que teníamos: el presupuesto no se mide en "4 modelos", se mide en minutos**, y
+no estábamos cerca del límite. Calibrando con la submission medida (41m52s):
+
+| modelo | costo |
+|---|---|
+| LSTM 128x2 | **6,0 min** |
+| GRU 128x2 | 4,5 min |
+| LSTM 192x2 | 12,4 min |
+| LSTM 256x2 | 21,2 min |
+| **nuestra cuaterna (3×128 + 1×256)** | **~40 min de los 60** |
+
+**Nos sobran casi 20 minutos: caben dos o tres modelos más.** El cuello nunca fue el tiempo de inferencia.
+
+**Segundo, la búsqueda, y acá está la trampa que hay que contar.** Selección hacia adelante sobre las 38
+corridas, una variante por corrida (la primera versión eligió `student_mask:best` **y** `student_mask:swa`, que
+son el mismo modelo entrenado una vez: contar doble). Sin partir los datos, la búsqueda encontró **+0.0009** con
+8 modelos. **Era sesgo de selección y se evaporó al validarlo**: eligiendo en la mitad de las secuencias y
+midiendo en la otra mitad,
+
+| | en la mitad donde se eligió | en la mitad nunca vista | contra nuestra cuaterna |
+|---|---|---|---|
+| mejor sin presupuesto (10 modelos, 73 min) | 0.6805 | 0.6931 | **−0.0001** |
+| mejor en 55 min (9 modelos, 52 min) | 0.6805 | 0.6929 | **−0.0004** |
+| **nuestra cuaterna** | — | **0.6933** | — |
+
+**Tercero, el último rincón: reemplazar una red por un árbol o por la ESN.** Lo que estaba medido era
+*agregarlos* como quinto modelo. Nunca se había probado *sacar* una red y poner uno de ellos, que es distinto
+porque correlacionan muchísimo más bajo (árboles 0.928, ESN 0.876, contra 0.99 de las redes) y son más baratos.
+Medido en las 200 secuencias donde los tres tienen predicciones:
+
+| cambio | efecto |
+|---|---|
+| −LA +xgboost | −0.0009 |
+| −LR +xgboost | −0.0013 |
+| −b256 / −long +xgboost | −0.0015 |
+| −LA +ESN | −0.0022 |
+| el resto con ESN | −0.0026 a −0.0029 |
+
+**Las ocho opciones son negativas.** Y la mejor combinación de los 8 candidatos en esas 200 secuencias
+(`LR`+`long`+`b256`+`mask`+`adapt8000`, +0.0007) es de puras redes, sin árboles ni ESN, elegida mirando esas
+mismas filas, y en la búsqueda grande sobre las 1.873 secuencias quedó en empate.
+
+**Conclusión: la cuaterna que tenemos ya es la mejor que se puede armar con dos meses de modelos, y nos sobran
+20 minutos de presupuesto que no hay con qué llenar.** Esto cierra la pregunta del ensamble de forma
+exhaustiva, no por muestreo: no es que no probamos las combinaciones, es que las probamos todas.
+
+Scripts: `analisis/ensamble_todo2.py` (las 38 corridas, con presupuesto y validación partida) y
+`analisis/ensamble_baratos.py` (árboles y ESN en la intersección).
+
 ### El sprint 23 cierra el último frente: la correlación más baja que logramos, y +0.0001 (2026-10-25)
 
 La normalización adaptativa por secuencia era lo único que quedaba sin probar, y era distinta de todo lo demás:
@@ -822,6 +880,7 @@ Nuestro valid de 10 grupos es más fácil que el test (baseline 0.6498 ahí): co
 | **042** | 2026-10-21 | **Sprint 24 — ensamble diverso de verdad.** 4 alumnos, cada uno con **datos distintos** (70 % de las secuencias, 7.424 de 10.607, semilla propia), **maestros distintos** (un par de los 4, no los 4 juntos) y **receta distinta** (lr, dropout, y uno GRU en vez de LSTM). 12 épocas, SWA 9–12 | 7.424 c/u | **0.6829** / **0.6819** / **0.6777** | — | — | ~1,7 h c/u | Kaggle T4 (cuenta `joaqfio`) | **Ataca la causa medida el mismo día:** nuestros 4 modelos están destilados de los mismos maestros, correlacionan 0.9854 y promediarlos vale +0.0021, contra +0.0051 de 4 modelos sin maestros compartidos. **Nunca habíamos variado nada entre los modelos salvo la semilla.** El puntaje individual va a ser más bajo (70 % de datos, 2 maestros): lo que decide es la correlación entre los cuatro. Si baja a ~0.95 con individual ~0.681, el ensamble va a ~0.690 → LB ~0.658 → puesto ~235. Generador: `notebooks_kaggle/make_sprint24.py`. **RESULTADO: corrieron 3 de 4 (`div_b` cancelado por cuota). La correlación bajó 0.0065, pero TODO lo puso el cambio de arquitectura de `div_d` (GRU): el par de LSTM con datos y maestros distintos quedó en 0.9849 contra 0.9860. Los tres PASAN la regla `s > S·r` con margen y la mejor cuaterna de los 7 gana +0.0000. Ver la sección de abajo: la regla falla.** |
 | **043** | 2026-10-24 | **¿El +0.047 de septiembre se puede alcanzar?** Descomposición del oráculo afín por secuencia y predicción de cada pieza desde las features (resumen de las primeras 2.000 filas: media, desvío y variación media de las 112, más 6 números de nuestras propias predicciones). Ridge ajustado en 936 secuencias, medido en 937 | — | **no se alcanza** | — | — | 6 min | **laptop, CPU** | **El +0.047 es un oráculo conjunto y sus dos piezas son impredecibles por separado: R² = +0.003 cada una.** Oráculo del factor + corrimiento predicho: −0.0316. Factor predicho + oráculo del corrimiento: +0.0035. Y el oráculo de *igualar la escala* (σ_y/σ_q) da **−0.0566**: igualar escalas empeora, así que el +0.047 nunca fue un problema de escala. **Lo que sí se predice es la confianza por secuencia r_s, R² = +0.57 fuera de muestra** —la señal más fuerte del proyecto— pero usarla como multiplicador empeora incluso con el oráculo (−0.0244). Scripts: `analisis/escala_paso{2,3,4}.py` |
 | **044** | 2026-10-25 | **Sprint 23 — normalización adaptativa por secuencia** (`--adapt-span 8000`), la única palanca que cambia *qué ve* la red en vez de agregar otro modelo. 10 épocas, SWA 7–10, receta de la alumna LR, semilla 2232 | 10.607 | **0.6801** (SWA) / 0.6794 (best) | — | — | 7,7 h | Kaggle T4 | **Funcionó como diversificador y no alcanzó igual. r con el ensamble 0.9832: la más baja de cualquier red que entrenamos** (los viejos están en 0.9939–0.9955). Probadas las 70 cuaternas de los 8 modelos: la mejor da 0.6861 contra nuestro 0.6860, **+0.0001**, y la nuestra queda 4ª de 70. Con 5 modelos +0.0002, pero no entran en los 60 min. **Cierra el último frente técnico.** La corrida hermana `adapt2000` murió: 695 min solo en los soft targets contra 37 min de ésta con el mismo código — suerte de máquina otra vez, y la guarda no lo agarró porque mide el arranque. Script: `analisis/s23_mide.py` |
+| **045** | 2026-10-25 | **Búsqueda de ensamble sobre TODO el proyecto**: 58 archivos de predicciones de 38 corridas (alumnas, sin destilar del sprint 4, 5 TCN, máscara, seqwp, cross, ema, half1/2, 192, 256, sprint 21, div del 24, adaptativa, LightGBM, XGBoost, ESN), selección hacia adelante con costo real de inferencia por arquitectura y **validación partida por secuencia** | — | **nuestra cuaterna ya era la mejor** | — | — | 25 min | **laptop, CPU** | **Sin partir los datos la búsqueda daba +0.0009; validado fuera de muestra es −0.0001 (sin presupuesto) y −0.0004 (en 55 min): era sesgo de selección.** Reemplazar una red por XGBoost o por la ESN: las 8 opciones negativas (−0.0009 a −0.0029). Y un error de encuadre corregido: **el presupuesto se mide en minutos, no en modelos, y nos sobran ~20 de los 60** (LSTM 128x2 = 6,0 min, 256x2 = 21,2). El cuello nunca fue la inferencia. Scripts: `analisis/ensamble_todo2.py`, `analisis/ensamble_baratos.py` |
 | 019 | 2026-09-18/19 | **Sprint 3, 1.ª corrida: 5 alumnos destilados de Dswa+Eswa+F+Gswa** con soft targets precalculados (trainer v4) | 10.607 | **FALLÓ** (los 5) | | | | Kaggle T4 | `CUDA out of memory` en el precálculo (forward de 20.000 pasos de una vez). Fix: por trozos de 2.000. Relanzado con prueba de humo |
 
 ## Próximos pasos

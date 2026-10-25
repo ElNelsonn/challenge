@@ -13,6 +13,9 @@ apunta a un directorio temporal de la sesión en la que se corrieron.
 
 | script | qué contesta | hallazgo |
 |---|---|---|
+| `ensamble_todo2.py` | ¿hay alguna combinación de los 38 modelos del proyecto que le gane a nuestra cuaterna? | **No.** Con validación partida: −0.0001 sin presupuesto, −0.0004 en 55 min. Y el presupuesto se mide en minutos: nos sobran ~20 de los 60 |
+| `ensamble_baratos.py` | ¿conviene reemplazar una red por XGBoost o por la ESN? | las 8 opciones negativas (−0.0009 a −0.0029), medido en las 200 secuencias donde los tres existen |
+| `ensamble_todo.py` | la primera versión de la búsqueda | **quedó como ejemplo de sesgo de selección**: daba +0.0009 sin partir los datos. Usar `ensamble_todo2.py` |
 | `s23_mide.py` | ¿la normalización adaptativa aporta al ensamble? | **r = 0.9832, la correlación más baja que logramos, y +0.0001.** Las 70 cuaternas de los 8 modelos |
 | `escala_paso4.py` | ¿se puede alcanzar el +0.047 de septiembre? | **No: es un oráculo conjunto y sus dos piezas dan R² = +0.003 cada una.** Correr este primero |
 | `escala_paso3.py` | ¿de dónde sale el +0.047, y se predice la confianza por secuencia? | no es de escala (igualarla da −0.0566); **la confianza `r_s` sí se predice, R² = +0.57**, pero aplicarla empeora |
