@@ -328,6 +328,36 @@ de esta familia puede predecir. Entrenar más modelos de este tipo, en cualquier
   **AUC 0.794**: el decil más probable tiene 34,9 % de filas puntuadas contra 0,5 % del más bajo. Entrenar pesando
   hacia esas filas es el único cambio que alinea lo que optimizamos con lo que nos puntúan (sprint 15A).
 
+## 2026-10-25 (dom) — El sprint 23 cierra el último frente, y confirma la hipótesis sin dar puntos
+
+- `adapt8000` terminó: **0.6801** con SWA, 0.6794 el mejor. Por debajo de nuestros cuatro (0.6823–0.6843).
+- Pero no lo cerré por el puntaje individual, porque el 22 medimos que eso no decide. Y lo que apareció al
+  medir el ensamble es lo más interesante del sprint:
+
+      adapt8000   r con el ensamble  0.9832   <- la mas baja de CUALQUIER red que entrenamos
+      div_d (GRU)                    0.9835
+      div_a                          0.9902
+      LR / LA / long / b256          0.9939 - 0.9955
+
+  **La hipótesis se confirmó:** cambiar lo que la red *ve* diversifica más que cambiar los datos, los maestros
+  o la arquitectura. Contra los modelos individuales queda en 0.972–0.979, cuando los cuatro viejos están en
+  0.9860 entre sí.
+- **Y dio +0.0001.** Probé las 70 cuaternas de los 8 modelos que tenemos: la mejor da 0.6861 contra nuestro
+  0.6860, y la nuestra queda 4ª de 70, dentro del ruido. Con cinco modelos +0.0002, pero cinco no entran en los
+  60 min de inferencia.
+- **Era el último frente técnico que teníamos identificado, y queda cerrado.** Pero deja el resultado más limpio
+  de todo el proyecto: en cuatro sprints bajamos la correlación de 0.9955 a 0.9832 usando la palanca más
+  agresiva que existe —cambiar la representación de entrada— y la ganancia fue +0.0001. **La correlación de
+  ~0.98 no es un defecto de nuestra receta: es cuánta información distinta hay para sacar de estos datos con
+  una red recurrente de este tamaño.**
+- **La otra corrida murió y la lección vale.** `adapt2000` gastó **695 minutos solo precalculando los soft
+  targets** y lo mató el límite de 12 h antes de la primera época. `adapt8000`, con el mismo código, tardó **37
+  minutos** en ese paso: 18,8 veces menos. La guarda midió 0,05 s por secuencia al arrancar y lo dejó pasar
+  porque **el frenazo apareció durante la corrida**. La guarda mide el arranque; para cubrir esto haría falta un
+  control de presupuesto dentro del bucle de soft targets. Es la cuarta corrida que perdemos por suerte de
+  máquina.
+- Cuota: quedan 10,30 h de GPU, se repone el 31.
+
 ## 2026-10-24 (sáb) — Abrí el número más grande del proyecto y era un oráculo
 
 - Se repuso la cuota (30 h). **Antes de lanzar nada revisé los notebooks del sprint 23 y les faltaba la guarda

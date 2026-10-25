@@ -162,11 +162,36 @@ y da cero; cambiar **datos, maestros y receta** no la baja y da cero.
 mismo que ya había dicho la prueba de train+valid (+17,7 % de datos = 0.0000). Lo que falta no es más de lo
 mismo: es **información que todavía no le damos a la red.**
 
-**EL ÚNICO FRENTE ABIERTO, y lo primero que hay que correr cuando haya GPU:** la **normalización adaptativa por secuencia** (`--adapt-span`, sprint 23). 97 de las
-112 features cambian de escala más de 2x entre secuencias (mediana 3,87x, las peores 10x) y las normalizábamos
-con un valor global. Implementado y verificado en local: la variación que ve la red baja de 4,07x a 1,09x.
-Las dos corridas murieron por el bug de rutas (ver EXPERIMENTS.md) y están listas en
-`notebooks_kaggle/connectome_sprint23_adapt{2000,8000}.ipynb`.
+**EL ÚLTIMO FRENTE, YA CERRADO (sprint 23, 2026-10-25).** La **normalización adaptativa por secuencia**
+(`--adapt-span`) era lo único que quedaba y lo único que cambia *qué ve* la red en vez de agregar otro modelo
+del mismo tipo: 97 de las 112 features cambian de escala más de 2x entre secuencias y las normalizábamos con un
+valor global.
+
+| | puntaje solo | r con el ensamble |
+|---|---|---|
+| `adapt8000` (SWA) | 0.6801 | **0.9832** |
+| LR / LA / long / b256 | 0.6823 – 0.6843 | 0.9939 – 0.9955 |
+| `div_a` / `div_c` / `div_d` | 0.6777 – 0.6829 | 0.9835 – 0.9902 |
+
+**La hipótesis se confirmó: es la correlación más baja de cualquier red que entrenamos.** Y la ganancia fue
+**+0.0001** — probadas las 70 cuaternas de los 8 modelos (cuatro es lo que entra en los 60 min), la mejor da
+0.6861 contra nuestro 0.6860 y la nuestra queda 4ª de 70.
+
+**El resultado más limpio del proyecto sale de juntar los dos últimos sprints:** bajamos la correlación de
+0.9955 a 0.9832 usando la palanca más agresiva que existe —cambiar la representación de entrada— y ganamos
++0.0001. **La correlación de ~0.98 no es un defecto de nuestra receta: es cuánta información distinta hay para
+sacar de estos datos con una red recurrente de este tamaño.**
+
+La corrida hermana `adapt2000` murió: gastó **695 minutos solo precalculando los soft targets** y la mató el
+límite de 12 h, cuando `adapt8000` con el mismo código tardó **37 minutos** en ese paso. Suerte de máquina otra
+vez; la guarda de velocidad mide el arranque (0,05 s/secuencia, la dejó pasar) y el frenazo apareció durante la
+corrida. Para cubrirlo haría falta un control de presupuesto dentro del bucle de soft targets.
+
+**Trabajo técnico pendiente si se retoma:** la normalización adaptativa **no está implementada en el kernel de
+inferencia** (`model/submission/solution.py` sólo tiene `MEAN`/`STD` fijos). Es viable —el kernel normaliza en
+float, la cuantización int8 es de los pesos— y cuesta ~1 min de los 19 que sobran del presupuesto, pero habría
+que escribirla y verificar paridad con PyTorch. El `adapt_span` queda guardado en `best_model.pt` dentro de
+`pipeline`, **no** en su config reducida: ahí lo tiene que leer el exportador.
 
 **Trampa de Kaggle que costó 24 h de cuota, y la corrección del diagnóstico:** dos corridas de 12 h murieron
 sin entrenar porque la lectura del parquet iba a 4,5 s por secuencia en vez de 0,06 s. Primero lo atribuí a que

@@ -13,6 +13,7 @@ apunta a un directorio temporal de la sesión en la que se corrieron.
 
 | script | qué contesta | hallazgo |
 |---|---|---|
+| `s23_mide.py` | ¿la normalización adaptativa aporta al ensamble? | **r = 0.9832, la correlación más baja que logramos, y +0.0001.** Las 70 cuaternas de los 8 modelos |
 | `escala_paso4.py` | ¿se puede alcanzar el +0.047 de septiembre? | **No: es un oráculo conjunto y sus dos piezas dan R² = +0.003 cada una.** Correr este primero |
 | `escala_paso3.py` | ¿de dónde sale el +0.047, y se predice la confianza por secuencia? | no es de escala (igualarla da −0.0566); **la confianza `r_s` sí se predice, R² = +0.57**, pero aplicarla empeora |
 | `escala_paso2.py` | la escala del target por secuencia, aplicada a las predicciones | igualar la escala exacta **empeora** (−0.0566); confirma el +0.047 del oráculo factor+corrimiento |
