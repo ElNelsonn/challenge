@@ -13,6 +13,8 @@ apunta a un directorio temporal de la sesión en la que se corrieron.
 
 | script | qué contesta | hallazgo |
 |---|---|---|
+| `test_libro2.py` | ¿las columnas del libro están en orden de profundidad? (12 secuencias, 2 instrumentos) | **El orden es fijo y permutado: mejor bid = `i0_p10` (99,9 %), mejor ask = `i0_p14` (99,8 %).** 12/12 secuencias coinciden en precios |
+| `test_libro.py` | lo mismo en detalle sobre una secuencia | el 'desequilibrio del tope' de `cross_features()` correlaciona +0,09 con el real |
 | `ensamble_todo2.py` | ¿hay alguna combinación de los 38 modelos del proyecto que le gane a nuestra cuaterna? | **No.** Con validación partida: −0.0001 sin presupuesto, −0.0004 en 55 min. Y el presupuesto se mide en minutos: nos sobran ~20 de los 60 |
 | `ensamble_baratos.py` | ¿conviene reemplazar una red por XGBoost o por la ESN? | las 8 opciones negativas (−0.0009 a −0.0029), medido en las 200 secuencias donde los tres existen |
 | `ensamble_todo.py` | la primera versión de la búsqueda | **quedó como ejemplo de sesgo de selección**: daba +0.0009 sin partir los datos. Usar `ensamble_todo2.py` |
