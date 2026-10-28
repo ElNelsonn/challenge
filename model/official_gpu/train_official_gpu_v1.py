@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import math
 import os
@@ -200,6 +201,20 @@ def select_groups(total: int, count: int, seed: int) -> list[int]:
     if not 1 <= count <= total:
         raise ValueError(f"count debe estar entre 1 y {total}")
     return sorted(np.random.default_rng(seed).choice(total, count, replace=False).tolist())
+
+
+QUANTA = np.array([0.12543, 0.24133, 0.46853, 0.65686])
+
+
+def sequence_classes(groups: ParquetGroups, ids: list[int], workers: int = 8) -> dict[int, int]:
+    def one(i):
+        f, g = groups.index[i]
+        t = f.read_row_group(g, columns=list(TARGET_COLUMNS), use_threads=False)
+        y = np.abs(np.concatenate([t[c].to_numpy() for c in TARGET_COLUMNS]))
+        y = y[y > 1e-6]
+        return int(np.argmin(np.abs(QUANTA - y.min()))) if len(y) else -1
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        return dict(zip(ids, ex.map(one, ids)))
 
 
 class FeaturePipeline:
@@ -439,9 +454,9 @@ def aux_targets(y, xraw, bidp1_0, askp1_0):
     return (a - a.mean((0, 1), keepdim=True)) / a.std((0, 1), keepdim=True).clamp_min(1e-6)
 
 
-def loss_wmse(pred, target, mask, gamma=1.0):
+def loss_wmse(pred, target, mask, gamma=1.0, floor=0.0):
     y = target.clamp(-2.0, 2.0)
-    w = y.abs() * mask.unsqueeze(-1)
+    w = (y.abs() + floor) * mask.unsqueeze(-1)
     if gamma != 1.0:
         w = w ** gamma
     return (w * (pred - y) ** 2).sum() / w.sum().clamp_min(1e-8)
@@ -489,6 +504,12 @@ def load_teacher(path, device):
     """Carga una GRU/LSTM de N capas (ambos formatos) como teacher congelado. Devuelve (net, mean, std, clip)."""
     ck = torch.load(path, map_location="cpu", weights_only=False)
     if "state_dict" in ck:
+        if ck["pipeline"].get("adapt_span", 0):
+            raise ValueError(
+                f"{path}: el teacher usa adapt_span={ck['pipeline']['adapt_span']}, "
+                "pero la inferencia de teachers solo aplica mean/std fijos. "
+                "Implementar su pipeline causal antes de usarlo para destilacion."
+            )
         sd, H, L, cell = ck["state_dict"], ck["config"]["hidden"], ck["config"]["layers"], ck["config"].get("cell", "gru")
         mean, std, clip = ck["pipeline"]["mean"], ck["pipeline"]["std"], float("inf")
     else:
@@ -520,8 +541,15 @@ def loss_wp(pred, target, mask):
 
 
 # ----------------------------------------------------------------------------- evaluación
+def realinear(p, lookahead):
+    if not lookahead:
+        return p
+    return np.concatenate([p[:, lookahead:], np.repeat(p[:, -1:], lookahead, 1)], 1)
+
+
 @torch.no_grad()
-def evaluate(model, pipe, groups: ParquetGroups, ids: list[int], device, batch: int, target_cd: bool = False):
+def evaluate(model, pipe, groups: ParquetGroups, ids: list[int], device, batch: int, target_cd: bool = False,
+             lookahead: int = 0):
     model.eval()
     acc, gacc = BlockAccumulator(), GlobalWP()
     rows = []
@@ -532,7 +560,7 @@ def evaluate(model, pipe, groups: ParquetGroups, ids: list[int], device, batch: 
         pred = model(x)[0].float()
         if target_cd:                      # la red da (suma, diferencia): volver a t0 y t1 para medir
             pred = torch.stack([pred[..., 0] + pred[..., 1], pred[..., 0] - pred[..., 1]], -1)
-        pred = pred.cpu().numpy()
+        pred = realinear(pred.cpu().numpy(), lookahead)
         for (seq_ix, need, _, y, scored), p in zip(data, pred):
             mask = need if scored is None else (need & scored)
             acc.add(y, p, mask)
@@ -553,7 +581,7 @@ def evaluate(model, pipe, groups: ParquetGroups, ids: list[int], device, batch: 
 
 
 @torch.no_grad()
-def _save_valid_preds(model, pipe, groups, ids, device, batch, path, target_cd: bool = False):
+def _save_valid_preds(model, pipe, groups, ids, device, batch, path, target_cd: bool = False, lookahead: int = 0):
     model.eval()
     seqs, preds = [], []
     for start in range(0, len(ids), batch):
@@ -562,18 +590,34 @@ def _save_valid_preds(model, pipe, groups, ids, device, batch, path, target_cd: 
         p = model(x)[0].float()
         if target_cd:                      # la red da (suma, diferencia): volver a t0 y t1 para guardar
             p = torch.stack([p[..., 0] + p[..., 1], p[..., 0] - p[..., 1]], -1)
-        p = p.cpu().numpy().astype(np.float16)
+        p = realinear(p.cpu().numpy(), lookahead).astype(np.float16)
         seqs += [d[0] for d in data]
         preds.append(p)
     model.train()
     np.savez_compressed(path, seq_ix=np.array(seqs, np.int64), preds=np.concatenate(preds))
 
 
+def _teacher_cache_key(paths):
+    """Identidad por contenido: dos best_model.pt de corridas distintas no son el mismo teacher.
+
+    Invalida caches anteriores basados solo en el nombre de archivo. No depende
+    de la ruta del checkpoint, que puede cambiar entre local y Kaggle.
+    """
+    digest = hashlib.sha256(b"connectome-soft-targets-v2\0")
+    for path in paths:
+        item = hashlib.sha256()
+        with Path(path).open("rb") as f:
+            for block in iter(lambda: f.read(1024 * 1024), b""):
+                item.update(block)
+        digest.update(item.digest())
+    return "sha256:" + digest.hexdigest()
+
+
 @torch.no_grad()
 def precompute_soft(teachers, teacher_paths, groups, ids, batch, workers, device, cache_path, chunk=2000):
     """Predicción promedio de los teachers para cada secuencia de ids -> dict id -> (SEQUENCE_LENGTH, 2) float16.
     Si cache_path existe y corresponde a los mismos teachers e ids, se carga; si no, se calcula y se guarda."""
-    key = "|".join(Path(t).name for t in teacher_paths)
+    key = _teacher_cache_key(teacher_paths)
     if cache_path:
         cp = Path(cache_path)
         if cp.exists():
@@ -646,6 +690,20 @@ def main():
     ap.add_argument("--exclude-train-groups", type=int, nargs="*", default=[],
                     help="indices de grupo que NO entran al entrenamiento. Para el modelo final con "
                          "train+valid: deja afuera las secuencias de valid que se usan para medir")
+    ap.add_argument("--train-classes", type=int, nargs="*", default=[], help="entrenar solo con estos instrumentos "
+                    "(0..3, por el cuanto del target: 0.1254 / 0.2413 / 0.4685 / 0.6569)")
+    ap.add_argument("--valid-classes", type=int, nargs="*", default=[], help="evaluar solo en estos instrumentos")
+    ap.add_argument("--soft-npz", default=None, help="etiquetas blandas ya calculadas: npz con soft (N, 20000, 2) e ids "
+                    "(índices de row group del parquet de entrenamiento)")
+    ap.add_argument("--unscored-weight", type=float, default=None, help="si el parquet de entrenamiento trae is_scored: "
+                    "peso de las filas no puntuadas (las puntuadas pesan 1)")
+    ap.add_argument("--weight-floor", type=float, default=0.0, help="pesos |y| + piso en la loss")
+    ap.add_argument("--cv-folds", type=int, default=0, help="partir valid en K pliegues por secuencia; train y valid "
+                    "tienen que ser el mismo parquet")
+    ap.add_argument("--cv-fold", type=int, default=-1, help="con --cv-folds: pliegue que queda afuera (-1 = ninguno)")
+    ap.add_argument("--cv-seed", type=int, default=4242)
+    ap.add_argument("--lookahead", type=int, default=0, help="maestro que mira adelante: la salida en la fila t "
+                    "predice el target de la fila t-K (ve K filas del futuro). Solo para generar etiquetas blandas")
     ap.add_argument("--train-half", type=int, choices=[1, 2], default=0, help="entrenar solo con la mitad 1 o la "
                     "mitad 2 de las secuencias de train (disjuntas): fuerza diversidad entre modelos")
     ap.add_argument("--aux-targets", action="store_true", help="cabezas extra al entrenar: targets suavizados a 20 y "
@@ -739,6 +797,28 @@ def main():
         train_ids = [train_ids[i] for i in sorted(elegidas)]
         print(f"Mitad {args.train_half}: {len(train_ids)} secuencias de entrenamiento", flush=True)
     valid_ids = list(range(len(valid))) if str(args.valid_groups) == "all" else select_groups(len(valid), int(args.valid_groups), args.seed + 1)
+    if args.unscored_weight is not None and not train.has_scored:
+        raise ValueError("--unscored-weight necesita is_scored en el parquet de entrenamiento")
+    if args.cv_folds and not args.resume:
+        if len(train) != len(valid):
+            raise ValueError("--cv-folds necesita el mismo parquet en train y valid")
+        pliegues = np.array_split(np.random.default_rng(args.cv_seed).permutation(len(valid)), args.cv_folds)
+        fuera = set(pliegues[args.cv_fold].tolist()) if args.cv_fold >= 0 else set()
+        train_ids = [i for i in train_ids if i not in fuera]
+        if fuera:
+            valid_ids = [i for i in valid_ids if i in fuera]
+        print(f"Pliegue {args.cv_fold} de {args.cv_folds}: {len(train_ids)} secuencias de entrenamiento, "
+              f"{len(valid_ids)} de valid", flush=True)
+    if args.train_classes and not args.resume:
+        tc = sequence_classes(train, train_ids, max(8, args.workers * 4))
+        cuenta = np.bincount([c for c in tc.values() if c >= 0], minlength=4).tolist()
+        train_ids = [i for i in train_ids if tc[i] in args.train_classes]
+        print(f"Instrumentos {args.train_classes}: {len(train_ids)} secuencias de entrenamiento "
+              f"(por clase: {cuenta})", flush=True)
+    if args.valid_classes and not args.resume:
+        vc = sequence_classes(valid, valid_ids, max(8, args.workers * 4))
+        valid_ids = [i for i in valid_ids if vc[i] in args.valid_classes]
+        print(f"Instrumentos {args.valid_classes}: {len(valid_ids)} secuencias de valid", flush=True)
 
     # ---- run dir / resume
     if args.resume:
@@ -802,6 +882,14 @@ def main():
             teachers = []
             if device.type == "cuda":
                 torch.cuda.empty_cache()
+    if cfg.get("soft_npz"):
+        z = np.load(cfg["soft_npz"], allow_pickle=False)
+        soft, zids = z["soft"], z["ids"]
+        soft_cache = {int(i): soft[k] for k, i in enumerate(zids)}
+        faltan = [i for i in train_ids if i not in soft_cache]
+        if faltan:
+            raise ValueError(f"{len(faltan)} secuencias de entrenamiento sin etiqueta blanda")
+        print(f"Etiquetas blandas de {cfg['soft_npz']} ({soft.nbytes/1e6:.0f} MB), peso {cfg['distill_weight']}", flush=True)
     mask_mu = mask_sd = mask_w = mask_b = None
     if cfg.get("mask_coef"):
         mc = json.loads(Path(cfg["mask_coef"]).read_text(encoding="utf-8"))
@@ -851,7 +939,7 @@ def main():
     def run_eval(tag, epoch, b_idx):
         nonlocal best
         t = time.time()
-        res, rows = evaluate(model, pipe, valid, valid_ids, device, cfg["eval_batch"], cfg.get("target_cd", False))
+        res, rows = evaluate(model, pipe, valid, valid_ids, device, cfg["eval_batch"], cfg.get("target_cd", False), cfg.get("lookahead", 0))
         wp = res["weighted_pearson"]
         print(f"  [{tag}] valid GLOBAL WP={wp:.4f} (t0={res['t0']:.4f}, t1={res['t1']:.4f})   "
               f"[por secuencia: {res['per_sequence_wp']:.4f}]  ({time.time()-t:.0f}s)", flush=True)
@@ -860,7 +948,7 @@ def main():
             best = wp
             save_model(run_dir / "best_model.pt")
             if cfg.get("save_valid_preds"):
-                _save_valid_preds(model, pipe, valid, valid_ids, device, cfg["eval_batch"], run_dir / "valid_preds_best.npz", cfg.get("target_cd", False))
+                _save_valid_preds(model, pipe, valid, valid_ids, device, cfg["eval_batch"], run_dir / "valid_preds_best.npz", cfg.get("target_cd", False), cfg.get("lookahead", 0))
             with (run_dir / "best_by_rowgroup.csv").open("w", newline="", encoding="utf-8") as f:
                 w = csv.DictWriter(f, fieldnames=list(rows[0]))
                 w.writeheader()
@@ -908,6 +996,13 @@ def main():
                 pr = torch.sigmoid(((xr0 - mask_mu) / mask_sd) @ mask_w + mask_b)
                 m = m * (pr / pr.mean()).pow(cfg["mask_power"])
                 del xr0
+            if cfg.get("unscored_weight") is not None:
+                sc = torch.from_numpy(np.stack([d[4] for d in data]).astype(np.float32)).to(device, non_blocking=True)
+                m = m * (sc + cfg["unscored_weight"] * (1.0 - sc))
+            if cfg.get("lookahead", 0):
+                la = cfg["lookahead"]
+                y = torch.cat([torch.zeros_like(y[:, :la]), y[:, :-la]], 1)
+                m = torch.cat([torch.zeros_like(m[:, :la]), m[:, :-la]], 1)
             state = None
             seq_stats = None                      # estadísticos acumulados de la secuencia (--loss seqwp)
             aux_full = None
@@ -920,6 +1015,8 @@ def main():
                 t_states = [None] * len(teachers)
             if soft_cache is not None:
                 soft_full = torch.from_numpy(np.stack([soft_cache[i] for i in batches[bi]])).to(device, non_blocking=True).float()
+                if cfg.get("lookahead", 0):
+                    soft_full = torch.cat([torch.zeros_like(soft_full[:, :cfg["lookahead"]]), soft_full[:, :-cfg["lookahead"]]], 1)
                 if cfg.get("target_cd"):
                     soft_full = torch.stack([(soft_full[..., 0] + soft_full[..., 1]) * 0.5,
                                              (soft_full[..., 0] - soft_full[..., 1]) * 0.5], -1)
@@ -943,7 +1040,7 @@ def main():
                                                 (soft[..., 0] - soft[..., 1]) * 0.5], -1)
                 if e > WARMUP:
                     if cfg["loss"] == "wmse":
-                        loss = loss_wmse(pred, y[:, s:e], m[:, s:e], cfg.get("weight_power", 1.0))
+                        loss = loss_wmse(pred, y[:, s:e], m[:, s:e], cfg.get("weight_power", 1.0), cfg.get("weight_floor", 0.0))
                     elif cfg["loss"] == "seqwp":
                         loss, seq_stats = loss_seqwp(pred, y[:, s:e], m[:, s:e], seq_stats, cfg.get("seqwp_decay", 0.98))
                         if cfg.get("wmse_anchor", 0.0) > 0:
@@ -953,7 +1050,7 @@ def main():
                     if cfg.get("gwp_weight", 0.0) > 0:
                         loss = loss + cfg["gwp_weight"] * loss_gwp(pred, y[:, s:e], m[:, s:e])
                     if teachers or soft_cache is not None:
-                        wsoft = y[:, s:e].clamp(-2.0, 2.0).abs() * m[:, s:e].unsqueeze(-1)   # mismos pesos que la métrica
+                        wsoft = (y[:, s:e].clamp(-2.0, 2.0).abs() + cfg.get("weight_floor", 0.0)) * m[:, s:e].unsqueeze(-1)
                         loss = loss + cfg["distill_weight"] * ((wsoft * (pred - soft) ** 2).sum() / wsoft.sum().clamp_min(1e-8))
                     if aux_full is not None:
                         ma = m[:, s:e].unsqueeze(-1)
@@ -997,12 +1094,12 @@ def main():
         swa_sd = {k: (v / swa_n).to(device) for k, v in swa_sum.items()}
         backup = {k: v.detach().clone() for k, v in model.state_dict().items()}
         model.load_state_dict(swa_sd)
-        res, _ = evaluate(model, pipe, valid, valid_ids, device, cfg["eval_batch"], cfg.get("target_cd", False))
+        res, _ = evaluate(model, pipe, valid, valid_ids, device, cfg["eval_batch"], cfg.get("target_cd", False), cfg.get("lookahead", 0))
         print(f"  [SWA épocas {cfg['swa_start']}-{cfg['epochs']} ({swa_n} modelos)] valid GLOBAL WP={res['weighted_pearson']:.4f} "
               f"(t0={res['t0']:.4f}, t1={res['t1']:.4f})", flush=True)
         save_model(run_dir / "swa_model.pt", extra={"swa": {"start": cfg["swa_start"], "n": swa_n, "valid": res}})
         if cfg.get("save_valid_preds"):   # permite armar tablas de ensambles en la laptop, sin GPU
-            _save_valid_preds(model, pipe, valid, valid_ids, device, cfg["eval_batch"], run_dir / "valid_preds_swa.npz", cfg.get("target_cd", False))
+            _save_valid_preds(model, pipe, valid, valid_ids, device, cfg["eval_batch"], run_dir / "valid_preds_swa.npz", cfg.get("target_cd", False), cfg.get("lookahead", 0))
         history.append({"epoch": cfg["epochs"], "batch": 0, "tag": "swa", "wp": res["weighted_pearson"], "t0": res["t0"], "t1": res["t1"], "time": time.time()})
         (run_dir / "metrics.json").write_text(json.dumps({"best_valid_wp": best, "swa_valid_wp": res["weighted_pearson"], "history": history,
                                                           "config": cfg, "params": n_params}, indent=2, default=str), encoding="utf-8")

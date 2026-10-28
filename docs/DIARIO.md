@@ -1,5 +1,121 @@
 # Diario del proyecto — Alpha Connectome (WunderNN)
 
+## 2026-10-27 (madrugada) — Lo que nos faltaba: valid se parece al test, train no
+
+- Busqué qué publicaron otros competidores. Uno con LB 0.6645 dejó sus notas: **train y valid son regímenes de
+  mercado distintos (AUC 0.993) y el test se parece a valid**. Su mayor salto (+0.007 en el LB) fue ajustar el
+  modelo con las secuencias de valid, pesando las filas puntuadas. Explica nuestra brecha de 0.032 y el LB clavado.
+- Joaquín pasó el token de la cuenta principal (30 h de GPU). Subí el dataset privado `connectome-ftv` (etiquetas
+  blandas de S10 + 6 checkpoints) y lancé el **sprint 26**: la LR con 5 pliegues de valid (prueba honesta) y el
+  ajuste con todo valid de los 6 miembros (4 LSTM de S10 + 2 GRU de S7).
+- Agregué al entrenador los maestros que miran adelante (`--lookahead`); en CPU ya llegan a 0.78. Van en el
+  sprint 27, apenas se libere la GPU.
+
+## 2026-10-27 (tarde) — El ajuste en valid funciona: +0.0030 firme
+
+- **Error mío:** el vigilante de los kernels se colgó en una llamada a Kaggle y me avisó a las 15:20 de algo que
+  terminó a la 1:40. Se perdieron ~13 h de reloj (no de cuota: la cuenta principal usó 3,4 h). Ahora cada llamada
+  tiene límite de 60 s.
+- **Sprint 26A, validación cruzada exacta:** la LR ajustada en valid da **0.6863 contra 0.6834** de la base
+  (+0.0030, desvío 0.0005), mejor en los 5 pliegues y en los 4 instrumentos. Un modelo solo ya iguala a S10.
+- **Listas para subir:** `ens4_ftv_mask_LR_LA_long_int8.zip` (S12: S10 ajustada en valid, mismo tiempo) y
+  `ens5_ftv_E_X_mask_LR_long_int8.zip` (S13: la mezcla 2 GRU + 3 LSTM ajustada).
+- **Control 25B** (cortado por cuota): la LR reentrenada con train sin destilar baja a 0.6813; la caída de los
+  especialistas en el instrumento 3 era por perder la destilación.
+- Corriendo: los maestros que miran 25 y 50 filas adelante (sprint 27). Con sus etiquetas viene el sprint 28.
+- **S11 en el LB: 0.65517, el mejor del proyecto** (+0.0011 sobre S10). Mismos modelos, sin reentrenar: 2 GRU de
+  S7 + 3 LSTM de S10. En valid quedaba 0.0003 por debajo de S10. Lo que llega al test es la diversidad.
+- **Maestro la50 (5 pliegues): 0.7932 fuera de pliegue** (instrumento 3: 0.633 contra 0.435 de los causales).
+  Lancé el sprint 28A: la prueba de la LR ajustada con esas etiquetas.
+- **Maestro la25: 0.7518 fuera de pliegue** (instrumento 3: 0.554). Sprint 29A: la misma prueba con sus etiquetas.
+  Con los dos resultados elijo las etiquetas para ajustar todos los miembros (S14).
+- **S13 en el LB: 0.65733, récord** (+0.0022 sobre S11). El ajuste en valid llega al test.
+- **Sprint 29A: la LR ajustada con etiquetas del maestro la25 da 0.6928 fuera de pliegue (+0.0066 sobre S10)**;
+  instrumento 3: 0.453. Armé S14a (S11 con esa LR a peso 0,5): 0.6939 fuera de pliegue contra 0.6860 de S11.
+- Probé ajustar las GRU en la CPU: 78 min por época, no sirve. Todo el entrenamiento va a Kaggle.
+- **S14a en el LB: 0.65610**, debajo de S13 (0.65733). La validación cruzada con etiquetas del maestro prometía
+  +0.0079 sobre S11 y dio +0.0009: **estaba inflada** porque el maestro de cada pliegue vio los otros pliegues.
+  Con etiquetas de S10 (que nunca vio valid) la prueba es limpia y sí se cumplió. Desde ahora: las etiquetas de
+  maestros se deciden en el LB (S14 completo contra S13); la receta del ajuste se mejora con la prueba limpia.
+- Maestro la10: 0.7110 fuera de pliegue. No lo pruebo con el método inflado.
+- Lancé el sprint 31A: la receta de S13 con lr 1e-4 (el competidor la midió mejor), prueba limpia.
+
+## 2026-10-28 — S14 listo; lr 1e-4 no cambia nada
+
+- **Sprint 31A (lr 1e-4):** 0.6862 contra 0.6863 con 2e-4. Cerrado.
+- **S14 listo** (`ens5_ftv29_E_X_mask_LR_long_int8.zip`): los 5 modelos de S13 ajustados con las etiquetas del
+  maestro la25 en vez de las de S10. Es la comparación limpia en el LB: mismos modelos, cambia la etiqueta.
+- **Sprint 32B:** ajuste con la receta de S13 de las GRU Z e Y, para probar un ensamble ajustado con 3 GRU
+  (S7 tenía 3 GRU; S11 mostró que la diversidad llega al test).
+
+## 2026-10-26 (noche) — Los especialistas por instrumento no sirven, y las filas puntuadas tampoco
+
+- **Sprint 25A (especialistas):** la LR ajustada 3 épocas solo con un instrumento, contra la LR sin tocar, cada una
+  en su instrumento: 0 **+0.0010**, 1 **+0.0004**, 2 **−0.0031**, 3 **−0.0069**. Pierde justo en el instrumento 3,
+  que es el 47 % de la métrica. La mejor época siempre fue la primera y después baja: aprende ruido.
+- **Las filas que puntúa la métrica son otro régimen:** la LR da 0.678 ahí y 0.482 en el resto. Con la misma
+  predicción, el target de las puntuadas es más grande (pendiente 1,03 contra 0,79 en el instrumento 3): la
+  selección depende del target, no solo de x. Probé la capa de salida ajustada directo sobre esas filas, mitad y
+  mitad de valid: **−0.0010 y +0.0001**. Nada.
+- **Microestructura del instrumento 3** (desbalance de colas, tiempos desde el último cambio, precio contra su
+  media larga, `i1`): todo correlaciona ≤ 0,05 con el residuo. La red ya usa el desbalance (−0,45 con su predicción).
+- **El patrón:** todo lo que se ajusta directo contra el target crudo empeora el instrumento 3. Lo único que lo
+  sostiene es la destilación.
+- **Qué sabe la red del instrumento 3:** distingue muy bien los dos estados de "no se mueve", A (0,−1) y B (−1,0),
+  pero no anticipa los movimientos: predice lo mismo antes de una suba que cuando el precio sigue quieto. Saber
+  cuándo hay movimiento llevaría el instrumento de 0.435 a 0.955.
+- **Un LightGBM sí anticipa algo** (AUC 0.645 contra 0.555 de la LR, dentro del estado A), **pero no da puntaje**:
+  armando la predicción óptima desde las probabilidades de los 5 estados queda en 0.380 contra 0.437 del ensamble,
+  y apilado sobre el estado interno de la LR, 0.438 contra 0.458. Esa ventaja está en filas que la métrica casi
+  no pesa (con peso |y|, las filas con target 0 no cuentan).
+- **Entrega lista para probar en el LB: `ens5_E_X_mask_LR_long_int8.zip`.** 2 GRU de S7 + 3 LSTM de S10, 0.6860
+  en valid, ~47 min. Prueba si la mezcla de arquitecturas (lo que tenía S7, nuestra mejor entrega en el LB) es lo
+  que llega al test. Armada sin GPU con `model/submission/merge_zips.py`; verificada contra sus partes.
+- **¿El LB plano desde S7 es ruido?** Medí cuánto se mueve S10 − S7 según el tamaño del test: desvío 0,0015 con
+  200 secuencias, 0,0010 con 400. Los tiempos del servidor indican un test del tamaño de valid (~1.900) y de S4 a
+  S7 el LB siguió a valid 1:1 dos veces. **No es ruido:** lo ganado en valid desde S8 no se trasladó.
+
+## 2026-10-26 (tarde) — Los datos son 4 instrumentos, y el 3 es donde perdemos
+
+- **El cuanto del target toma exactamente 4 valores** (0.1254 / 0.2413 / 0.4685 / 0.6569): cada secuencia es de
+  uno de 4 instrumentos. Se reconoce sin mirar el target, por los valores exactos de `a7`, `i0_p10`, `i0_p14` e
+  `i0_dp1` (100 % desde la fila 1 en valid).
+- **Puntaje por instrumento:** 0.799 / 0.771 / 0.729 / **0.435**. El instrumento 3 (tick grande, ~8 precios por
+  secuencia) se lleva el **47 % del peso** de la métrica. Los 32 modelos del proyecto dan 0.41–0.43 ahí: es un
+  techo de esta familia, no de un modelo.
+- **Train y valid tienen mezclas distintas** (instrumento 3: 43 % contra 37 %). Repesando valid con la mezcla de
+  train, el ensamble baja de 0.686 a 0.641. El LB (0.654) queda en el medio: explica parte de la brecha de 0.032.
+- **Cerrado con medición:** recalibrar por instrumento (+0.0000), mapas no lineales de la salida (ruido), una capa
+  de salida por instrumento (peor que una común) y elegir un ensamble por instrumento (sobreajusta).
+- **Abierto:** sprint 25 en Kaggle. A: LR ajustada 3 épocas solo con un instrumento, una vez por instrumento.
+  B: la misma receta con todos (control). Si A gana, en inferencia cada secuencia usa su especialista y el tiempo no
+  cambia. Kernel listo: `model/submission/solution_gated.py` + `build_gated.py`.
+- Corrección de la auditoría que incorporé: **la LSTM 128 cuesta ~10,5 min en el servidor** (41m52s eran 4×128),
+  así que b256 no entra con otras tres.
+
+## 2026-10-26 — Auditoría independiente de referencias, causalidad y costo
+
+Se contrastaron los archivos y predicciones con el handoff. Informe completo:
+[AUDITORIA_2026-10-26.md](AUDITORIA_2026-10-26.md).
+
+- Métrica global confirmada en la web vigente. Baseline fijo reproducido: 0,649812330.
+  Baseline global completo histórico: 0,617052286; 0,589594483 era la métrica vieja.
+- Cache de 3.528.273 filas verificado contra todas las secuencias del parquet.
+- ZIP local: mask SWA + LR SWA + LA best + long best, cuatro LSTM 128×2.
+  Sus pesos se reconstruyen exactamente. No es la cuaterna con b256 de los análisis recientes.
+- Costo relativo con b256: 1,58–1,83× en dos mediciones locales. La atribución de 41m52s
+  a esa cuaterna era incorrecta; su encaje en 60 minutos no está probado.
+- Q[t][:2000] en escala_paso3/4 usa primeras filas puntuadas, no primeros pasos;
+  mediana del último paso usado: 19.650. La interpretación causal temprana no se sostiene.
+- Ranking normalizado del libro no prueba profundidad física; selección best/SWA en TODO valid
+  precede a la partición A/B en ensamble_todo2. No hay un holdout nuevo limpio.
+- Dos calibradores cruzados no aportan: −0,000045 / −0,000050.
+- Correcciones preventivas: rechazo explícito de normalización adaptativa no soportada
+  en exportador/teachers/evaluador; cache de soft targets por SHA-256 del checkpoint.
+  Siete pruebas pasan. No se atribuye retrospectivamente un fallo de entrenamiento sin evidencia.
+- No se entrenó en Kaggle, no hubo submissions ni push. Se dejó un protocolo para retomar
+  con referencia exacta y una comparación controlada sobre eventos causales por instrumento.
+
 Registro cronológico de qué se hizo, qué se decidió y por qué. Los números exactos de cada experimento
 están en `EXPERIMENTS.md`; los artefactos (configs, curvas, pesos, logs) en `model/*/results/`.
 

@@ -1,5 +1,49 @@
 # Scripts de medición
 
+**Auditoría 2026-10-26:** las conclusiones históricas de la tabla requieren las salvedades de
+[`docs/AUDITORIA_2026-10-26.md`](../docs/AUDITORIA_2026-10-26.md). En particular, el ranking de precios
+anonimizados no demuestra profundidad física, la cuaterna con b256 no es el último ZIP y algunos
+resúmenes de predicciones llamados causales usan filas puntuadas de casi toda la secuencia.
+
+Scripts nuevos, con rutas relativas al proyecto y `--output` explícito:
+
+- `auditoria_20261026.py`: cache completo contra parquet, baseline fijo opcional, scores,
+  mezclas con clipping correcto, intervalos por secuencia y calibración cruzada exploratoria.
+- `auditoria_precios_20261026.py`: precios anonimizados, hipótesis de redundancia y comprobación
+  del horizonte real de los resúmenes antiguos. Ejecutar después del anterior.
+
+**Instrumentos (2026-10-26).** Usan `instrumentos_comun.py` (cache en `analisis/_cache`). Correr primero
+`python analisis/instrumentos.py valid` y `... train`.
+
+- `instrumentos.py`: el instrumento de cada secuencia por el cuanto del target. **Son 4**: 0.1254 / 0.2413 /
+  0.4685 / 0.6569. Train 12/12/33/43 %, valid 21/19/23/37 %.
+- `instrumentos_deteccion.py`: reconocerlo sin target, por valores exactos de `a7`, `i0_p10`, `i0_p14`,
+  `i0_dp1`. 100 % desde la fila 1.
+- `por_instrumento.py`: puntaje por instrumento (0.799 / 0.771 / 0.729 / **0.435**; el 3 pesa 47 %) y
+  recalibración por instrumento (+0.0000).
+- `cabeza_volcado.py <best_model.pt> <tag>` + `cabeza_por_instrumento.py <tag>`: capa de salida por
+  instrumento sobre la LSTM congelada. Peor que una común (0.6794 contra 0.6815).
+- `pool_modelos.py` + `seleccion_por_instrumento.py`: ensamble distinto por instrumento. Sobreajusta.
+- `filas_puntuadas_regla.py`: cómo caen las filas con `is_scored` alrededor de los cambios del target, por
+  instrumento. Vienen en bloques; en el 3 evitan las zonas con cambios (0,4 veces la densidad de base).
+- `filas_puntuadas_vs_resto.py`: la LR en filas puntuadas contra no puntuadas (**0.678 contra 0.482**) y la
+  pendiente target/predicción en cada grupo (1,01–1,06 contra 0,79 en el instrumento 3).
+- `cabeza_filas_puntuadas.py` (necesita `hid_valid_LR.npz` de `cabeza_volcado.py`): capa de salida reajustada
+  con las filas puntuadas de valid, mitad y mitad. −0.0010 / +0.0001: nada.
+- `residuo_microestructura.py <instrumento> <secuencias>`: 14 rasgos de microestructura contra el residuo de la
+  LR. Todos ≤ 0,05; sumarlos empeora.
+- `inst3_estados.py`: predicción media del ensamble por estado del target en el instrumento 3 y oráculos. La red
+  distingue A de B pero no anticipa movimientos; saberlos llevaría el instrumento a 0.955.
+- `inst3_anticipar_movimientos.py <train> <valid>`: AUC de "se mueve o no" dentro de cada estado. LightGBM 0.645 /
+  0.617 contra 0.555 / 0.534 de la LR.
+- `inst3_estructural_lgb.py <train> <valid> <rondas>`: predictor óptimo desde las probabilidades de los 5 estados.
+  0.380 solo; mezclado no gana de forma estable.
+- `inst3_apilado_lgb.py <valid> <rondas>` (necesita `hid_train_LR.npz` y `hid_valid_LR.npz`): lo mismo sobre el
+  estado interno de la LR. 0.438 contra 0.458 de la LR sola.
+- `ruido_leaderboard.py` (necesita `member_scored.npz`, las predicciones de cada miembro en las filas puntuadas):
+  cuánto se mueve la diferencia entre dos entregas según cuántas secuencias tenga el test. Para S10 − S7: desvío
+  0,0022 con 100 secuencias, 0,0015 con 200, 0,0010 con 400.
+
 Los análisis que están detrás de los hallazgos de `EXPERIMENTS.md`. Corren **en la laptop, sin GPU**, sobre
 predicciones de valid ya guardadas: no entrenan nada, solo miden.
 

@@ -1,5 +1,14 @@
 # Registro de experimentos
 
+> **2026-10-26 — Auditoría de referencias y medición:** ver
+> [docs/AUDITORIA_2026-10-26.md](docs/AUDITORIA_2026-10-26.md).
+> Baseline de 10 grupos reproducido: 0,649812330 global. Cache de 3.528.273 filas verificado
+> contra las 1.873 secuencias del parquet. La cuaterna LR best + LA best + long best + b256 SWA
+> da 0,686047560, pero no corresponde al último ZIP local (cuatro redes de 128, con mask y LR SWA).
+> Calibración lineal/cuadrática cruzada: −0,000045 / −0,000050, sin mejora.
+> Se corrigen riesgos de pipeline adaptativo y cache de teachers; siete pruebas pasan.
+> Se revisan las conclusiones previas sobre causalidad, orden del libro y validación independiente.
+
 > ⚠️ **2026-09-16: los organizadores CAMBIARON LA MÉTRICA.** Antes: WP por secuencia, promediada sobre secuencias.
 > Ahora: **WP GLOBAL** — todas las filas scoreadas de todo el dataset juntas, una correlación ponderada por target, promedio de t0 y t1.
 > Consecuencias: (1) `utils.BlockAccumulator` calcula la métrica vieja; la nueva está en `GlobalWP` (en `model/lgbm_deltas/` y `model/official_gpu/`).
@@ -21,6 +30,178 @@ El baseline oficial da **0.568** en esos 10 grupos (0.5896 en las 1.873 completa
 | 007 | 2026-09-15 | **`model/official_gpu/train_official_gpu_v1.py`** (nuevo): GRU 128x2, batch 8, chunk 256, loss wmse, clip 1.0, lr 1e-3, 2 épocas | 100 | **0.490** | 0.478 | 0.502 | ~9 min | laptop CPU | con solo 100 seqs iguala casi a exp 006 (500 seqs LSTM-64); ép.1 = 0.477. Script validado (resume, top-k, flags, loss wp) |
 | 008 | 2026-09-15 | ídem, **primera corrida en Kaggle GPU (T4)**, batch 32, chunk 512, 1 época | 200 | 0.462 | 0.459 | 0.465 | **10 s** | Kaggle GPU | pipeline GPU validado: ~50× más rápido que CPU → 1 época con 10.607 seqs ≈ 8–10 min |
 | **009** | 2026-09-15 | **Primera corrida completa en Kaggle**: GRU 128x2, batch 32, chunk 512, wmse, clip 1.0, lr 1e-3, lr-decay 0.9, 10 épocas (`full_gru128x2_10ep`) | **10.607 (todo)** | **0.5838** (ép. 4) | 0.573 | 0.595 | 64 min | Kaggle GPU T4 | **+0.016 sobre el baseline (0.568)**. Curva: 0.551 / 0.579 / 0.581 / **0.584** / 0.564 / 0.571 / 0.577 / 0.580 / 0.570 / 0.575 → meseta desde ép. 4; train loss sigue bajando (1.40→1.25) → empieza a sobreajustar. t1 siempre ~0.03 > t0. |
+
+## El giro: ajustar los modelos con valid (2026-10-27)
+
+**De dónde sale.** Un competidor con LB **0.6645** (+0.0105 sobre nosotros) publicó sus notas sin código
+([jy447.github.io, 2026-10-24](https://jy447.github.io/2026/10/24/alfa-connectome-notes/)). Lo que importa:
+
+- **Train y valid son regímenes de mercado distintos** (un clasificador los separa con AUC 0.993) y **el test se
+  parece a valid**. Secuencias del régimen de train no le transfirieron al test. Esto explica nuestra brecha de
+  0.032 y que el LB no se mueva con lo que ganamos entrenando solo con train.
+- Su mayor salto en el LB fue **ajustar el modelo con las 1.873 secuencias de valid**: todos los pesos, 6 épocas,
+  lr 2e-4, weight decay 1e-4, filas puntuadas con peso 1 y el resto 0,1, target 0,2 × real + 0,8 × etiqueta
+  blanda. **+0.00715 en el LB.** Validado con 5 pliegues de valid (cada secuencia medida por un modelo que no la vio).
+- Etiquetas de **maestros que miran adelante** (ven las próximas 25 o 50 filas; 0.81 / 0.89 en valid), con
+  validación cruzada: +0.0013. Todo lo de etiquetas junto: ~+0.0125. Arquitectura: nada medible.
+- Target: `t0` = F − ask, `t1` = bid − F, con F un precio de referencia futuro sobre la grilla de ticks. Tiempo:
+  pesos en float16 para entrar en 60 min.
+
+**Qué hicimos con eso** (cuenta principal `joaquinfiorina`, 30 h de GPU):
+
+| sprint | qué | estado |
+|---|---|---|
+| 26A | LR SWA ajustada en valid con su receta; 5 pliegues (prueba honesta) + 2 semillas con todo valid para la entrega | **hecho, ver abajo** |
+| 26B | lo mismo con todo valid para mask, LA, long (LSTM de S10) y E, X (GRU de S7) | hecho |
+| 27 | maestros que miran 25 y 50 filas adelante (la LSTM LR prediciendo el target de la fila t−K), 5 pliegues | **hecho: fuera de pliegue la25 0.7518, la50 0.7932** (por instrumento la50: 0.881 / 0.872 / 0.821 / **0.633**; la25: 0.857 / 0.839 / 0.786 / 0.554). El competidor reporta 0.81 y 0.89 |
+| 28A / 29A | la prueba del 26A (LR, 5 pliegues + 2 semillas) con etiquetas la50 / la25 en vez de S10. Salvedad: el maestro del pliegue j vio el pliegue k, así que la prueba puede salir un poco optimista | 29A hecho, 28A corriendo |
+| 29B | ajuste con etiquetas la25 de mask, LA, long (2 semillas) y E, X: el material de S14 | hecho → `ens5_ftv29_E_X_mask_LR_long_int8.zip` (**S14**, paridad 2.2e-2) |
+| 31A | la receta de S13 con lr 1e-4 (prueba limpia, etiquetas S10) | hecho: **0.6862 contra 0.6863** con lr 2e-4. Sin efecto |
+| 32B | ajuste con la receta de S13 de las GRU Z e Y (2 semillas): para un ensamble ajustado con 3 GRU | corriendo |
+
+**Resultado del 29A (validación cruzada exacta, época 6):**
+
+| | global | inst 0 | inst 1 | inst 2 | inst 3 |
+|---|---|---|---|---|---|
+| S10 | 0.6862 | 0.7996 | 0.7710 | 0.7292 | 0.4347 |
+| LR ajustada, etiquetas S10 (26A) | 0.6863 | 0.8001 | 0.7712 | 0.7307 | 0.4339 |
+| **LR ajustada, etiquetas la25 (29A)** | **0.6928** | 0.8021 | 0.7722 | 0.7353 | **0.4528** |
+| LR ajustada, etiquetas la50 (28A) | 0.6877 | 0.7989 | 0.7696 | 0.7305 | 0.4408 |
+
+**Un solo modelo +0.0066 sobre S10 (desvío 0.0021)**, mejor en los 5 pliegues (+0.004 a +0.011 contra las etiquetas de S10) y en los 4 instrumentos; el instrumento 3 sube 0.018, lo primero que lo mueve en todo el proyecto. Salvedad de la tabla de arriba: puede estar algo inflado porque el maestro de cada pliegue vio los demás. **El maestro la50 predice mejor (0.79 contra 0.75) pero como etiqueta rinde menos (+0.0015 contra +0.0066)**: ve tanto futuro que su salida incluye lo que un modelo causal no puede aprender. Que el maestro más débil gane también sugiere que la ganancia no es filtración (si lo fuera, el más fuerte ganaría más). Etiquetas causales (K = 0) +0.000, K = 25 +0.0066, K = 50 +0.0015: se prueba K = 10 (sprint 30).
+
+**Resultado del 26A (validación cruzada exacta: cada secuencia de valid predicha por el modelo de la época 6 que
+no la vio, calculado en la laptop):**
+
+| | global | inst 0 | inst 1 | inst 2 | inst 3 |
+|---|---|---|---|---|---|
+| LR base (SWA) | 0.6834 | 0.7971 | 0.7669 | 0.7263 | 0.4308 |
+| **LR ajustada en valid** | **0.6863** | 0.8001 | 0.7712 | 0.7307 | 0.4339 |
+| S10 (4 modelos) | 0.6862 | 0.7996 | 0.7710 | 0.7292 | 0.4347 |
+| S10 con la LR ajustada | 0.6868 | 0.8001 | 0.7718 | 0.7300 | 0.4356 |
+
+**+0.0030 sobre la LR base, con desvío 0.0005 (bootstrap por secuencia): mejora en los 5 pliegues y en los 4
+instrumentos.** Un solo modelo ajustado ya rinde lo que el ensamble S10. Lectura honesta: buena parte es que la
+red aprende a copiar a S10 (80 % de la etiqueta); para pasar a S10 hacen falta etiquetas mejores, que es lo que
+buscan los maestros del 27. Detalle técnico: con `--swa-start` igual a `--epochs` el entrenador no guarda SWA, por
+eso se usó `last_model.pt`.
+
+**Entregas listas para el LB (sin subir):**
+
+| zip | qué | tiempo | verificación |
+|---|---|---|---|
+| `ens4_ftv_mask_LR_LA_long_int8.zip` (**S12**) | los 4 LSTM de S10 ajustados en valid (sopa de 2 semillas cada uno) | igual que S10, ~42 min | int8 = float en 17.704 filas (0.7799 y 0.7799) |
+| `ens5_ftv_E_X_mask_LR_long_int8.zip` (S13) | la mezcla de S11 (2 GRU + 3 LSTM), ajustada | ~47 min | paridad 1.1e-2 |
+
+No se puede medir su puntaje en valid (los modelos finales vieron todo valid). Lo que se espera por la validación
+cruzada: un poco más que S10 en valid (≈ +0.001), y el LB dirá si el régimen de valid se traslada al test.
+
+Etiquetas blandas del 26: el promedio de los 4 miembros de S10 sobre valid (0.6863), que nunca vieron valid, así
+que no hay filtración. Código nuevo en el entrenador: `--cv-folds/--cv-fold` (pliegues de valid),
+`--unscored-weight`, `--soft-npz` (etiquetas ya calculadas), `--weight-floor`, `--lookahead K`. Prueba en CPU del
+maestro con 25 filas: 0.78 en secuencias que no vio, con solo 60 de entrenamiento y 3 épocas.
+`model/submission/soup_models.py` promedia los pesos de varias semillas.
+
+## Los datos son 4 instrumentos distintos (2026-10-26)
+
+**El hallazgo.** El "cuanto" del target (el escalón mínimo entre valores de `t0`/`t1`) no varía de forma continua
+entre secuencias: toma **exactamente 4 valores**. Cada secuencia es de uno de 4 instrumentos.
+
+| instrumento | cuanto | secuencias train | secuencias valid | precios distintos de `i0_p10` en una secuencia (mediana) |
+|---|---|---|---|---|
+| 0 | 0.12543 | 1.305 (12 %) | 398 (21 %) | 538 |
+| 1 | 0.24133 | 1.257 (12 %) | 347 (19 %) | 150 |
+| 2 | 0.46853 | 3.488 (33 %) | 431 (23 %) | 22 |
+| 3 | 0.65686 | 4.557 (43 %) | 697 (37 %) | 8 |
+
+Las 12.480 secuencias de train+valid caen en uno de los 4 (error máximo del cuanto 1e-5). El instrumento 3 es
+de "tick grande": el precio toma ~8 valores en 20.000 filas.
+
+**Se reconoce desde la primera fila, sin mirar el target.** Los valores exactos (float32) de algunas features se
+repiten dentro de un instrumento y casi nunca entre instrumentos. Con una tabla de valores armada en train:
+`a7` sola acierta el 100 % de 625 secuencias de valid al terminar el calentamiento (fila 99); `a7` + `i0_p10` +
+`i0_p14` + `i0_dp1` aciertan el 100 % desde la fila 1. No usa `seq_ix` ni datos de otras secuencias.
+
+**Cuánto vale cada uno en la métrica** (ensamble LR+LA+long+b256, valid completo):
+
+| instrumento | puntaje | peso en la métrica (t0 / t1) |
+|---|---|---|
+| 0 | 0.7993 | 28 % / 28 % |
+| 1 | 0.7708 | 16 % / 15 % |
+| 2 | 0.7291 | 9 % / 8 % |
+| **3** | **0.4348** | **46 % / 49 %** |
+
+**La brecha valid → leaderboard tiene una explicación parcial.** Train y valid tienen mezclas distintas de
+instrumentos. Si se repesa valid para que tenga la mezcla de train, el mismo ensamble da **0.641** en vez de
+0.686. El leaderboard (0.654) queda en el medio: el test tiene probablemente **más instrumento 3 que valid**,
+que es justo donde puntuamos peor. Esto **no** explica por qué el LB quedó plano de S7 a S10: esas mejoras de
+valid fueron parejas en los 4 instrumentos (instrumento 3: 0.4305 → 0.4352).
+
+**Todos los modelos del proyecto tocan el mismo techo en el instrumento 3.** 32 modelos compatibles con el kernel
+(GRU/LSTM, 128 a 256, destilados o no): entre **0.412 y 0.432** en el instrumento 3. b256 0.4322 contra LR 0.4319:
+más capacidad no ayuda ahí.
+
+**Lo que se probó con esto y NO sirve** (todo medido fuera de muestra, partiendo valid por secuencias):
+
+| idea | resultado |
+|---|---|
+| recalibrar escala + corrimiento por instrumento (8 parámetros por target) | **+0.00000** (sd 0.00019); las pendientes ya dan 1.01–1.05: la red sabe en qué instrumento está |
+| mapa no lineal de las dos salidas por instrumento (polinomios grado 1–5) | −0.0003 a +0.0002, ruido |
+| capa de salida propia por instrumento sobre la LSTM congelada (LR) | **peor**: 0.6794 contra 0.6815 de una capa común reajustada con los mismos datos; peor en los 4 instrumentos |
+| elegir un ensamble distinto por instrumento entre los 32 modelos | +0.0003 y −0.0009 en dos particiones (instrumento 3: −0.0038): sobreajusta |
+| **sprint 25A**: ajustar la LR completa 3 épocas solo con un instrumento (un especialista por instrumento) | instrumento 0 **+0.0010**, 1 **+0.0004**, 2 **−0.0031**, 3 **−0.0069** contra la LR sin tocar (0.7960 / 0.7674 / 0.7260 / 0.4319). Pierde justo donde está el peso. **El control 25B** (la misma receta con todos los instrumentos; cortado por cuota tras 2 épocas) da 0.6813 global y 0.4264 en el instrumento 3: la caída viene de ajustar sin destilación, no de especializar. Especialistas contra control: +0.0011 / +0.0022 / −0.0005 / −0.0014 |
+| capa de salida de la LR reajustada con **las filas puntuadas de valid** (las que mira la métrica), mitad y mitad por secuencia | común **−0.0010 y +0.0001** en dos particiones; por instrumento −0.0031 y −0.0023. Los instrumentos 0 y 1 mejoran siempre (+0.0015 a +0.0021) y el 3 empeora siempre (−0.004 a −0.008) |
+| microestructura en el instrumento 3: desbalance de colas (1 y 3 niveles), tiempo desde el último cambio de precio, dirección del último cambio, precio contra su media de 100/1.000/5.000 filas, desbalance de `i1` | correlación con el **residuo** de la LR ≤ 0,05 en las 14; el desbalance de 3 niveles correlaciona −0,45 con la predicción: la red ya lo usa. Sumarlas en lineal: **−0.016** (sobreajusta) |
+| instrumento 3, **predictor estructural**: LightGBM que clasifica los 5 estados del target (300 secuencias de train, features + diferencias a 1/10/100 filas) y arma la predicción óptima Σ P(s)·E[\|y\|y\|s] / Σ P(s)·E[\|y\|\|s] | solo **0.3803** contra 0.4372 del ensamble (300 secuencias de valid); correlación 0,83. Mezcla con peso 0,1: +0.0018 en una mitad, −0.0001 en la otra |
+| lo mismo **apilado sobre la LSTM**: el LightGBM recibe el estado interno (128) y la salida de la LR, con o sin las features | **0.4377** y **0.4256** contra **0.4584** de la LR sola en las mismas filas; ninguna mezcla le gana a la LR |
+
+**Las filas que puntúa la métrica son otro régimen.** En valid, la misma LR da **0.678 en las filas puntuadas y
+0.482 en el resto**; predice más fuerte en las puntuadas (desvío 0,86 contra 0,52 en el instrumento 0) y tienen
+|target| mayor. Con la misma predicción, el target de las puntuadas es más grande: la pendiente del target sobre
+la predicción da 1,01–1,06 en las puntuadas y **0,79** en las no puntuadas del instrumento 3. O sea, **la
+selección depende del target y no solo de las features**, y eso no lo arregla la máscara del sprint 15A (que se
+calcula desde x). Por eso se probó la capa de salida ajustada directo sobre esas filas (tabla de arriba): tampoco
+da nada. Las puntuadas vienen en bloques contiguos; el porcentaje cambia por instrumento (13 / 7 / 3 / 13 %) y, en
+el instrumento 3, caen en zonas con menos cambios de target antes **y** después (0,4 veces la densidad de base).
+`need_prediction` es True en todas las filas desde la 99: no lleva información.
+
+**Qué sabe y qué no sabe la red en el instrumento 3.** Predicción media del ensamble según el estado real:
+
+| estado (ticks) | filas | peso t0 / t1 | predicción t0 | predicción t1 |
+|---|---|---|---|---|
+| A (0, −1), no se mueve | 37 % | 0 % / 34 % | −0.365 | −0.882 |
+| sube (+k, −3) | 15 % | 24 % / 43 % | −0.356 | −0.971 |
+| B (−1, 0), no se mueve | 32 % | 32 % / 0 % | −0.899 | −0.325 |
+| baja (−3, +k) | 14 % | 42 % / 21 % | −0.975 | −0.338 |
+
+La red separa muy bien A de B, pero **dentro de cada uno no ve venir el movimiento**: predice lo mismo antes de
+una suba que cuando el precio sigue en A. Todo su puntaje sale de reconocer el estado. Oráculos: saber cuándo hay
+movimiento llevaría el instrumento a **0.955**; distinguir A de B no agrega nada (0.5006 contra 0.5010). Hay una
+razón en la métrica: con peso |y| las filas con target 0 no cuentan, así que en A la predicción óptima de `t0` no
+depende de la probabilidad de moverse; la señal de "se viene un movimiento" solo llega por el otro target.
+
+Un LightGBM con features crudas y diferencias **sí** anticipa algo: dentro de A, ¿sube o sigue? AUC **0.645**
+contra 0.555 de la LR; dentro de B, ¿baja o sigue? **0.617** contra 0.534 (entrenado en 200 secuencias de train,
+medido en 150 de valid; lo más útil: `a6`, `a3` y volúmenes del lado ask). **Pero no se convierte en puntaje**
+(las dos filas nuevas de la tabla de arriba): esa ventaja está en filas que pesan poco, y pasar por los 5 estados
+pierde la magnitud que la red sí predice.
+
+**El patrón que se repite:** todo lo que se ajusta directo contra el target crudo empeora el instrumento 3
+(especialistas, capas de salida, features nuevas), y lo que lo sostiene es la LR original, destilada de maestros.
+El target del instrumento 3 es casi todo ruido (69 % de las filas son "no se mueve" y el resto, saltos de 3 ticks
+o más): ajustar contra él aprende el ruido.
+
+**Estructura del target en el instrumento 3** (en ticks): o "no se mueve" (`t0,t1` = 0,−1 o −1,0: 69 % de las
+filas puntuadas), o sube (`t0` = +k, `t1` = −3 fijo), o baja (al revés). El target queda constante durante tramos
+largos y, cuando el precio actual sube un tick, `t0` baja uno: se comporta como "precio futuro − precio actual".
+Las filas puntuadas casi nunca caen donde el target cambia (1 % contra 5 % de base).
+
+Scripts (scratchpad de la sesión, copiados a `analisis/`): `instrumentos.py`, `por_instrumento.py`,
+`cabeza_por_instrumento.py`, `filas_puntuadas_regla.py`, `filas_puntuadas_vs_resto.py`,
+`cabeza_filas_puntuadas.py`, `residuo_microestructura.py`. Código nuevo: `--train-classes` / `--valid-classes` en el entrenador,
+`model/submission/solution_gated.py` + `build_gated.py` (kernel que detecta el instrumento en el calentamiento y
+desde la fila 99 corre solo los modelos de ese instrumento; verificado 8/8 bien detectadas, paridad 2e-2 con
+int8).
 
 ## Hallazgos de infraestructura (2026-09-12)
 
@@ -864,6 +1045,9 @@ Nuestro valid de 10 grupos es más fácil que el test (baseline 0.6498 ahí): co
 | **030** | 2026-10-06 | **Sprint 13 — mitades DISJUNTAS de los datos.** Dos alumnas LSTM 128x2 lr 5e-4, 10 ép., SWA 7–10, entrenadas sobre 5.303 secuencias cada una **sin una sola en común** (seeds 2131/2132) | 5.303 c/u | mitad1 0.6806/**0.6806** · mitad2 0.6809/**0.6815** · promedio de las dos **0.6832** | | | 1,5 h c/u | Kaggle T4 ×2 | **El resultado más importante del proyecto.** Con la mitad de los datos pierden solo 0.002, y sobre todo: **sus predicciones correlacionan 0.984 entre sí**, igual que todo el resto de la familia. Dos modelos que no compartieron ni una secuencia de entrenamiento aprenden **la misma función**. No es falta de diversidad por receta: es que con estas 112 entradas y esta clase de modelo, la función está esencialmente determinada |
 | **S9** | 2026-10-06 | `submissions/ens3_long_LR_LA_int8.zip` (long + LR + LA, **0.6857** en valid) | | 0.7091 (6 seqs) | 43,3 → 31m52s real (686 MB) | **0.6533** | **Valid dejó de transferir.** Serie: S7 valid 0.6843 → LB 0.6542 (brecha 0.0301) · S8 0.6855 → 0.6541 (0.0314) · S9 0.6857 → **0.6533** (0.0324). La brecha **crece** justo lo que ganamos en valid: es sesgo de selección acumulado (época elegida por valid, hiperparámetros elegidos por valid, combinación elegida por valid). **Valid ya no puede rankear modelos a resolución de 0.002** |
 | **S10** | 2026-10-09 | `submissions/ens4_mask_LR_LA_long_int8.zip` (mask + LR + LA + long, **0.6863** en valid) | | — | 41,0 estimado → **41m52s real** (690 MB) | **0.6540** | **Cuarta submission seguida con el leaderboard plano.** Valid subió 0.0020 desde S7 y el LB se movió −0.0002. Serie de brechas: S7 0.0301 · S8 0.0314 · S9 0.0324 · S10 **0.0323**. Todo lo ganado en valid desde el 19 de septiembre es sesgo de selección. **Regla nueva: no gastar submissions en variantes elegidas por valid; solo en modelos que sean distintos por una razón estructural.** El tiempo estimado acertó a 52 s: el modelo de costo sirve para planificar los árboles |
+| **S11** | 2026-10-27 | `submissions/ens5_E_X_mask_LR_long_int8.zip` (Eswa + X de S7, GRU; mask + LR + long de S10, LSTM; **0.6860** en valid) | | 39.802 filas: igual a (2·[E,X] + 3·[mask,LR,long])/5 con error 1.4e-7 | 1,11–1,15 × S10 en A/B intercalado → ~47 min estimado, **46m21s real** | **0.65517 — el mejor LB del proyecto** (+0.0011 sobre S10, +0.0010 sobre S7). **La hipótesis se confirma: lo que llega al test es la mezcla de arquitecturas, no lo ganado en valid** (en valid S11 queda 0.0003 debajo de S10) | **Prueba de una hipótesis, no una variante elegida por valid.** S7 (3 GRU + 1 LSTM) es la mejor entrega en el LB aunque puntúa menos en valid, y desde S8 todo fue solo LSTM. Si la mezcla de arquitecturas es lo que llega al test, esto debería pasar a S10 por ≥ 0.001. Armada sin reentrenar con `model/submission/merge_zips.py`, que junta modelos de zips existentes (verificado: reconstruir S10 da arreglos idénticos) |
+| **S13** | 2026-10-27 | `submissions/ens5_ftv_E_X_mask_LR_long_int8.zip` (S11 con los 5 modelos ajustados en valid, etiquetas de S10) | | paridad 1.1e-2 | ~47 min estimado, **48m12s real** | **0.65733 — nuevo récord** (+0.0022 sobre S11, +0.0033 sobre S10; ~puesto 300) | **El ajuste en valid llega al test**, entero o más de lo que prometía la validación cruzada. Valid se parece al test: confirmado |
+| **S14a (lista)** | 2026-10-27 | `submissions/ens5_E_X_mask_long_LRla25w50_int8.zip`: E, X, mask, long de S11 sin tocar (0,125 cada uno) + **LR ajustada con etiquetas del maestro la25** (sopa de 2 semillas, peso 0,5) | | A/B contra S11: mismo kernel y arquitecturas (1,08 con la laptop ruidosa → ≤ ~50 min) | ~46 min, **46m27s real** | **0.65610** (+0.0009 sobre S11, **−0.0012 contra S13**) | Fuera de pliegue prometía +0.0079 sobre S11 y dio +0.0009. **La prueba con etiquetas de maestros estaba inflada**: el maestro de cada pliegue vio los demás pliegues. La prueba con etiquetas de S10 no tiene ese problema (S10 nunca vio valid) y sí se cumplió en S13. Lección: las pruebas con etiquetas de maestros entrenados en valid no sirven para decidir; manda el LB o una validación anidada |
 | **031** | 2026-10-07 | **Sprint 14 — OTRA CLASE DE MODELO: convolucional causal dilatada** (`--arch tcn`, 128 canales × 5 capas, dilataciones 1/4/16/64/256, campo receptivo 683 filas, 260k operaciones por fila ≈ las 254k de la LSTM 128x2). **Sin destilar a propósito.** Dos pasos de aprendizaje: 5e-4 (seed 2141) y 1.5e-3 (seed 2142) | 10.607 | lr 5e-4 0.6722 / SWA **0.6739** · lr 1.5e-3 0.6683 / SWA **0.6734** | 0.670 | 0.678 | 2 h c/u | Kaggle T4 ×2 | **No alcanza, pero es lo más distinto que logramos:** su correlación con la familia recurrente es **0.962–0.972**, la más baja medida (entre LSTM es 0.976–0.988). Aun así no aporta al ensamble: con el peso óptimo elegido en la mitad A da **−0.0001** en la mitad B. **Dos salvedades:** la curva **seguía subiendo** en la época 10 (0.6684 → 0.6722) y corrió **sin destilación**, que vale +0.003. Por eso se repite bien entrenada (sprint 15B) antes de cerrarla |
 | **032** | 2026-10-07/08 | **Sprint 15A — pesar el entrenamiento hacia las filas que la métrica puntúa** (`--mask-coef`, AUC 0.794, potencia 1.0). LSTM 128x2 destilada, lr 5e-4, 10 ép., SWA 7–10, seed 2151 | 10.607 | 0.6840 / SWA **0.6840** | 0.680 | 0.688 | 2 h | Kaggle T4 | **+0.0006 sobre la alumna LR (0.6834): dentro del ruido entre semillas.** Alinear el entrenamiento con lo que la métrica mira no cambia nada medible. Su correlación con la familia es 0.974–0.986, igual que todo |
 | **033** | 2026-10-07/08 | **Sprint 15B — la convolucional bien entrenada**: 20 épocas + destilación (seed 2152) | 10.607 | 0.6782 / SWA **0.6782** (curva **todavía subiendo** en la ép. 20: 0.6776/0.6778/0.6782) | 0.674 | 0.682 | 4 h | Kaggle T4 | **Sube +0.004 respecto de la versión sin destilar, pero su correlación con la familia sube de 0.962 a 0.975.** La destilación la empuja a imitar a las LSTM: gana score y pierde lo único que la hacía valiosa. Ensamble: **+0.0000** honesto (elegido en una mitad de valid, medido en la otra). **Lección: destilar y ser distinto están en conflicto** |

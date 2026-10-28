@@ -1,5 +1,14 @@
 # Prompt de transferencia — Alpha Connectome ML Competition
 
+> **Auditoría del 2026-10-26:** leer primero [AUDITORIA_2026-10-26.md](AUDITORIA_2026-10-26.md).
+> Corrige referencias de este documento: baseline global completo = **0,617052**, no 0,589595;
+> el ZIP local asociado a la última entrega contiene **mask SWA + LR SWA + LA best + long best,
+> cuatro LSTM 128×2**, no una de 256. La proyección de 41m52s no corresponde a la cuaterna con b256.
+> El supuesto orden físico del libro no está demostrado. Los resúmenes de primeras 2.000
+> predicciones de escala_paso3/4 usan filas puntuadas, llegando hasta el final de la secuencia;
+> no son causales tempranos. La validación partida conserva selección previa sobre TODO valid.
+> Se conservan abajo los resultados históricos; las correcciones e incertidumbres están en la auditoría.
+
 > Documento de entrada para un asistente que retoma este proyecto sin historia previa. Describe la tarea, los
 > datos, la métrica, la infraestructura, el código escrito, las técnicas implementadas y la ubicación exacta de
 > cada archivo. Los resultados se dan como mediciones, para que quien lea decida qué hacer con ellas.

@@ -55,6 +55,11 @@ class GlobalWP:
 def load_model(path, device):
     ck = torch.load(path, map_location="cpu", weights_only=False)
     if "state_dict" in ck:
+        if ck["pipeline"].get("adapt_span", 0):
+            raise ValueError(
+                f"{path}: adapt_span={ck['pipeline']['adapt_span']} no esta soportado "
+                "por este evaluador de mean/std fijos; usar el pipeline causal del trainer."
+            )
         sd, H, L, n_in = ck["state_dict"], ck["config"]["hidden"], ck["config"]["layers"], ck["n_inputs"]
         mean, std, cell, clip = ck["pipeline"]["mean"], ck["pipeline"]["std"], ck["config"].get("cell", "gru"), float("inf")
     else:

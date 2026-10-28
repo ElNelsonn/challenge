@@ -36,6 +36,12 @@ def load_any(path):
     import torch
     ck = torch.load(path, map_location="cpu", weights_only=False)
     if "state_dict" in ck:
+        if ck["pipeline"].get("adapt_span", 0):
+            raise ValueError(
+                f"{path}: adapt_span={ck['pipeline']['adapt_span']} requiere normalizacion "
+                "causal con estado; solution.py solo soporta mean/std fijos. "
+                "No se puede exportar este checkpoint con este kernel."
+            )
         sd, H, L, n_in = ck["state_dict"], ck["config"]["hidden"], ck["config"]["layers"], ck["n_inputs"]
         mean, std = ck["pipeline"]["mean"], ck["pipeline"]["std"]
         cell, clip = ck["config"].get("cell", "gru"), float("inf")        # train_official_gpu_v1 no recorta

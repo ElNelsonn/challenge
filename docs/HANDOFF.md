@@ -1,5 +1,10 @@
 # HANDOFF — para retomar el trabajo en una sesión nueva de Claude
 
+> **Actualización 2026-10-26:** empezar por [AUDITORIA_2026-10-26.md](AUDITORIA_2026-10-26.md).
+> El handoff conserva referencias históricas que no coinciden entre sí. Se verificaron cache completo,
+> baseline fijo, composición real del ZIP, costo relativo de inferencia y límites de la validación.
+> Hay correcciones locales del exportador, teachers, evaluador y cache, con siete pruebas de regresión.
+
 Archivo pensado para que una sesión nueva arranque con todo el contexto. Joaquín lo abre y escribe algo como:
 `Leé challenge/docs/HANDOFF.md, challenge/docs/DIARIO.md (última entrada) y challenge/EXPERIMENTS.md (tabla de submissions) y seguimos desde ahí.`
 
