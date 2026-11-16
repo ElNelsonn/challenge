@@ -1,0 +1,24 @@
+{
+ "id": "joaqfio/connectome-s50a-s21",
+ "title": "connectome-s50a-s21",
+ "code_file": "connectome_sprint50a_s21.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": true,
+ "enable_tpu": false,
+ "enable_internet": true,
+ "keywords": [],
+ "dataset_sources": [
+  "joaquinfiorina/connectome-train-part1",
+  "joaquinfiorina/connectome-train-part2",
+  "joaquinfiorina/connectome-valid",
+  "joaqfio/connectome-fusion",
+  "joaqfio/connectome-soft-s10",
+  "joaqfio/connectome-la49"
+ ],
+ "kernel_sources": [],
+ "competition_sources": [],
+ "model_sources": [],
+ "machine_shape": "NvidiaTeslaT4"
+}

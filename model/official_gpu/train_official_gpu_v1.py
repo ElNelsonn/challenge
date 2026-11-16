@@ -29,6 +29,7 @@ import json
 import math
 import os
 import sys
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
@@ -153,6 +154,45 @@ def _ema_desde(x: np.ndarray, span: int, init: np.ndarray) -> np.ndarray:
     return out
 
 
+FUSION_SPANS = [15, 127, 1023]
+
+
+def fusion_features(x: np.ndarray) -> np.ndarray:
+    x = x.astype(np.float32)
+    d = np.zeros_like(x)
+    d[1:] = x[1:] - x[:-1]
+    parts = [d] + [x - _ema(x, s).astype(np.float32) for s in FUSION_SPANS]
+    return np.concatenate(parts, axis=1).astype(np.float32)
+
+
+try:
+    from numba import njit
+
+    @njit(nogil=True)
+    def _fusion_norm(x, mean, std, alfas):
+        T, n = x.shape
+        k = len(alfas)
+        f = np.empty((T, n * (2 + k)), np.float32)
+        ema = np.empty((k, n), np.float64)
+        for a in range(k):
+            for j in range(n):
+                ema[a, j] = x[0, j]
+        for t in range(T):
+            for j in range(n):
+                v = x[t, j]
+                f[t, j] = (v - mean[j]) / std[j]
+                d = v - x[t - 1, j] if t > 0 else 0.0
+                f[t, n + j] = (d - mean[n + j]) / std[n + j]
+                for a in range(k):
+                    ema[a, j] += alfas[a] * (v - ema[a, j])
+                    p = (2 + a) * n + j
+                    f[t, p] = (v - ema[a, j] - mean[p]) / std[p]
+        return f
+except ImportError:
+    _fusion_norm = None
+FUSION_ALFAS = np.array([2.0 / (s + 1.0) for s in FUSION_SPANS], np.float64)
+
+
 def ema_features(x: np.ndarray, plus: bool = False) -> np.ndarray:
     """(T, 112) -> (T, len(EMA_NAMES)): desvío respecto de promedios móviles largos + volatilidad lenta."""
     sub = x[:, EMA_IX_PLUS if plus else EMA_IX].astype(np.float32)
@@ -176,23 +216,62 @@ class ParquetGroups:
 
     def __init__(self, paths: list[str]):
         self.files = [pq.ParquetFile(p) for p in paths]
+        self.rutas = {id(f): p for f, p in zip(self.files, paths)}
+        self.hilos = threading.local()
         self.index = [(f, g) for f in self.files for g in range(f.num_row_groups)]
         self.has_scored = all("is_scored" in f.schema_arrow.names for f in self.files)
+        self.con_scored = {id(f): "is_scored" in f.schema_arrow.names for f in self.files}
+        self.relleno = 0.0
+
+    def del_hilo(self, f):
+        propios = self.hilos.__dict__
+        h = propios.get(id(f))
+        if h is None:
+            h = propios[id(f)] = pq.ParquetFile(self.rutas[id(f)], metadata=f.metadata)
+        return h
+
+    def extend(self, paths: list[str], grupos, seqs, relleno: float):
+        extra = [pq.ParquetFile(p) for p in paths]
+        self.rutas.update({id(f): p for f, p in zip(extra, paths)})
+        todos = [(f, g) for f in extra for g in range(f.num_row_groups)]
+
+        def primero(f, g):
+            return int(f.read_row_group(g, columns=["seq_ix"], use_threads=False)["seq_ix"][0].as_py())
+
+        if all(int(g) < len(todos) and primero(*todos[int(g)]) == int(s) for g, s in zip(grupos, seqs)):
+            nuevos = [todos[int(g)] for g in grupos]
+        else:
+            mapa = {primero(f, g): (f, g) for f, g in todos}
+            faltan = [int(s) for s in seqs if int(s) not in mapa]
+            if faltan:
+                raise ValueError(f"{len(faltan)} seq_ix extra no están en {paths}")
+            nuevos = [mapa[int(s)] for s in seqs]
+            print("aviso: los row groups no coinciden con los locales; secuencias ubicadas por seq_ix", flush=True)
+        self.files += extra
+        self.con_scored.update({id(f): "is_scored" in f.schema_arrow.names for f in extra})
+        self.index += nuevos
+        self.relleno = relleno
 
     def __len__(self):
         return len(self.index)
 
     def read(self, i: int):
         f, g = self.index[i]
+        tiene = self.has_scored and self.con_scored[id(f)]
         cols = ["seq_ix", "step_in_seq", "need_prediction", *FEATURE_COLUMNS, *TARGET_COLUMNS]
-        if self.has_scored:
+        if tiene:
             cols.append("is_scored")
-        t = f.read_row_group(g, columns=cols, use_threads=False)
+        t = self.del_hilo(f).read_row_group(g, columns=cols, use_threads=False)
         seq_ix, need = validate_sequence(t)
         x = np.column_stack([t[c].to_numpy() for c in FEATURE_COLUMNS]).astype(np.float32)
         y = np.column_stack([t[c].to_numpy() for c in TARGET_COLUMNS]).astype(np.float32)
         x[~np.isfinite(x)] = 0.0
-        scored = t["is_scored"].to_numpy().astype(bool) if self.has_scored else None
+        if tiene:
+            scored = t["is_scored"].to_numpy().astype(bool)
+        elif self.has_scored:
+            scored = np.full(len(x), self.relleno, np.float32)
+        else:
+            scored = None
         return seq_ix, need, x, y, scored
 
 
@@ -209,7 +288,7 @@ QUANTA = np.array([0.12543, 0.24133, 0.46853, 0.65686])
 def sequence_classes(groups: ParquetGroups, ids: list[int], workers: int = 8) -> dict[int, int]:
     def one(i):
         f, g = groups.index[i]
-        t = f.read_row_group(g, columns=list(TARGET_COLUMNS), use_threads=False)
+        t = groups.del_hilo(f).read_row_group(g, columns=list(TARGET_COLUMNS), use_threads=False)
         y = np.abs(np.concatenate([t[c].to_numpy() for c in TARGET_COLUMNS]))
         y = y[y > 1e-6]
         return int(np.argmin(np.abs(QUANTA - y.min()))) if len(y) else -1
@@ -221,7 +300,8 @@ class FeaturePipeline:
     """112 crudas (+ flags de centinela) (+ lags/deltas de features.py). Guarda su normalizador."""
 
     def __init__(self, top_k: int, sentinel_flags: bool, ranking: Path | None, cross: bool = False,
-                 ema: bool = False, ema_plus: bool = False, adapt_span: int = 0):
+                 ema: bool = False, ema_plus: bool = False, adapt_span: int = 0, fusion: bool = False):
+        self.fusion = fusion
         self.ema_plus = ema_plus
         self.adapt_span = adapt_span
         self.top_k = top_k
@@ -245,6 +325,8 @@ class FeaturePipeline:
             out += CROSS_NAMES
         if self.ema:
             out += EMA_NAMES_PLUS if self.ema_plus else EMA_NAMES
+        if self.fusion:
+            out += [f"{c}_dif1" for c in FEATURE_COLUMNS] + [f"{c}_menos_ema{s}" for s in FUSION_SPANS for c in FEATURE_COLUMNS]
         out += [s.name for s in self.specs]
         return out
 
@@ -259,6 +341,8 @@ class FeaturePipeline:
             parts.append(cross_features(x))
         if self.ema:
             parts.append(ema_features(x, self.ema_plus))
+        if self.fusion:
+            parts.append(fusion_features(x))
         if self.specs:
             from features import build_sequence
             derived = build_sequence(x, self.specs)[:, len(FEATURE_COLUMNS):]
@@ -283,6 +367,9 @@ class FeaturePipeline:
             self.std[a:b] = 1.0
 
     def transform(self, x: np.ndarray) -> np.ndarray:
+        if (self.fusion and _fusion_norm is not None and not (self.sentinel_flags or self.cross or self.ema or self.specs
+                                                              or self.adapt_span) and np.isfinite(x).all()):
+            return _fusion_norm(np.ascontiguousarray(x, dtype=np.float32), self.mean, self.std, FUSION_ALFAS)
         f = self.raw_to_features(x)
         if self.adapt_span:
             f = self._normalizar_adaptativo(f)
@@ -308,7 +395,7 @@ class FeaturePipeline:
 
     def state(self) -> dict:
         return {"top_k": self.top_k, "sentinel_flags": self.sentinel_flags, "cross": self.cross,
-                "ema": self.ema, "ema_plus": self.ema_plus, "adapt_span": self.adapt_span,
+                "ema": self.ema, "ema_plus": self.ema_plus, "adapt_span": self.adapt_span, "fusion": self.fusion,
                 "specs": [(s.base_feature, s.transform, s.lag) for s in self.specs],
                 "mean": self.mean, "std": self.std, "names": self.names}
 
@@ -385,6 +472,52 @@ class RNNModel(nn.Module):
         s_broad = s_use.unsqueeze(2).expand(B, T // k, k, self.slow_hidden).reshape(B, T, self.slow_hidden)
         y = self.head(torch.cat([out, s_broad], -1))
         return (y if with_aux else y[..., :2]), (core_state, slow_state, s_seq[:, -1])
+
+
+class FusionModel(nn.Module):
+    def __init__(self, n_in: int, emb: int = 64, hidden: int = 128, mid: int = 64, n_aux: int = 0):
+        super().__init__()
+        self.n_aux = n_aux
+        self.emb = nn.Linear(n_in, emb)
+        self.core = nn.GRU(emb, hidden, num_layers=1, batch_first=True)
+        self.mid = nn.Linear(hidden + emb, mid)
+        self.head = nn.Linear(mid, 2 + n_aux)
+        self.act = nn.LeakyReLU(0.01)
+
+    def forward(self, x, state=None, with_aux=False):
+        core_state = state[0] if state is not None else None
+        e = self.act(self.emb(x))
+        out, core_state = self.core(e, core_state)
+        y = self.head(self.act(self.mid(torch.cat([out, e], -1))))
+        return (y if with_aux else y[..., :2]), (core_state, None, None)
+
+
+class LookAheadModel(nn.Module):
+    def __init__(self, n_in: int, hidden: int = 128, layers: int = 2, canales: int = 64, dil=(1, 2, 4, 8, 9), n_aux: int = 0):
+        super().__init__()
+        self.n_aux = n_aux
+        self.k = sum(dil) + 1
+        self.core = nn.GRU(n_in, hidden, num_layers=layers, batch_first=True)
+        self.proj = nn.Conv1d(n_in, canales, 1)
+        self.f = nn.ModuleList(nn.Conv1d(canales, canales, 2, dilation=d) for d in dil)
+        self.g = nn.ModuleList(nn.Conv1d(canales, canales, 2, dilation=d) for d in dil)
+        self.head = nn.Linear(hidden + canales, 2 + n_aux)
+
+    def lector(self, z):
+        h = self.proj(z.flip(1).transpose(1, 2))
+        for f, g in zip(self.f, self.g):
+            p = nn.functional.pad(h, (f.dilation[0], 0))
+            h = h + torch.tanh(f(p)) * torch.sigmoid(g(p))
+        return h.transpose(1, 2).flip(1)
+
+    def forward(self, x, state=None, with_aux=False, futuro=None):
+        core_state = state[0] if state is not None else None
+        out, core_state = self.core(x, core_state)
+        z = torch.cat([x, futuro], 1) if futuro is not None else x
+        fut = self.lector(z)
+        fut = torch.cat([fut, fut.new_zeros(fut.shape[0], 1, fut.shape[2])], 1)[:, 1:x.shape[1] + 1]
+        y = self.head(torch.cat([out, fut], -1))
+        return (y if with_aux else y[..., :2]), (core_state, None, None)
 
 
 class TCNModel(nn.Module):
@@ -682,8 +815,17 @@ def main():
     ap.add_argument("--mask-coef", default=None, help="JSON con el modelo que estima la probabilidad de que una fila "
                     "sea puntuada por la métrica (mean/std/w/b). Pesa el entrenamiento hacia esas filas")
     ap.add_argument("--mask-power", type=float, default=1.0, help="con --mask-coef: exponente del peso (0 = sin efecto)")
-    ap.add_argument("--arch", choices=["rnn", "tcn"], default="rnn", help="rnn: GRU/LSTM (lo de siempre); "
-                    "tcn: convolucional causal dilatada, otra clase de modelo")
+    ap.add_argument("--arch", choices=["rnn", "tcn", "fusion", "lookahead"], default="rnn", help="rnn: GRU/LSTM (lo de siempre); "
+                    "tcn: convolucional causal dilatada, otra clase de modelo; fusion: proyección + GRU de una capa "
+                    "(usar con --fusion-features); lookahead: GRU causal + lector convolucional de las filas futuras "
+                    "(maestro, solo para generar etiquetas blandas)")
+    ap.add_argument("--la-canales", type=int, default=64)
+    ap.add_argument("--la-dil", type=int, nargs="+", default=[1, 2, 4, 8, 9], help="dilataciones del lector del futuro; "
+                    "la suma + 1 es cuántas filas futuras ve (1 2 4 8 9 = 25, 1 2 4 8 16 18 = 50)")
+    ap.add_argument("--fusion-features", action="store_true", help="suma 448 columnas: diferencia con la fila anterior "
+                    "y desvío respecto de promedios móviles de 15, 127 y 1023 filas de las 112")
+    ap.add_argument("--fusion-emb", type=int, default=64)
+    ap.add_argument("--fusion-mid", type=int, default=64)
     ap.add_argument("--tcn-channels", type=int, default=128)
     ap.add_argument("--tcn-layers", type=int, default=5, help="dilataciones 1, 4, 16, 64, 256: campo receptivo 683 filas")
     ap.add_argument("--tcn-kernel", type=int, default=3)
@@ -702,6 +844,12 @@ def main():
                     "tienen que ser el mismo parquet")
     ap.add_argument("--cv-fold", type=int, default=-1, help="con --cv-folds: pliegue que queda afuera (-1 = ninguno)")
     ap.add_argument("--cv-seed", type=int, default=4242)
+    ap.add_argument("--extra-train-parquet", nargs="+", default=None, help="parquet de donde sumar secuencias al "
+                    "entrenamiento (van después de las de --train-parquet)")
+    ap.add_argument("--extra-train-seqs", default=None, help="npz con g (row group dentro de --extra-train-parquet) y "
+                    "seq (seq_ix esperado, se verifica)")
+    ap.add_argument("--extra-weight", type=float, default=0.185, help="peso por fila de las secuencias extra, que no "
+                    "traen is_scored (0.185 = peso medio de una fila de valid con --unscored-weight 0.1)")
     ap.add_argument("--lookahead", type=int, default=0, help="maestro que mira adelante: la salida en la fila t "
                     "predice el target de la fila t-K (ve K filas del futuro). Solo para generar etiquetas blandas")
     ap.add_argument("--train-half", type=int, choices=[1, 2], default=0, help="entrenar solo con la mitad 1 o la "
@@ -729,6 +877,7 @@ def main():
     ap.add_argument("--init-from", default=None, help="checkpoint (best_model.pt / swa_model.pt) para inicializar pesos (fine-tuning)")
     ap.add_argument("--distill-teachers", nargs="*", default=[], help="rutas .pt de teachers; sus predicciones promediadas son target blando")
     ap.add_argument("--distill-weight", type=float, default=1.0, help="peso de la loss blanda (WMSE contra el teacher)")
+    ap.add_argument("--real-weight", type=float, default=1.0, help="peso de la loss contra el target real (0 = solo etiquetas blandas)")
     ap.add_argument("--distill-cache", default=None, help="archivo .npz para precalcular UNA vez las predicciones de los teachers "
                     "(fp16, ~850 MB para todo train) y reutilizarlas en todas las épocas/corridas; '' = precalcular solo en RAM. "
                     "Sin esta opción los teachers corren en cada chunk de cada época (2x más lento)")
@@ -778,6 +927,13 @@ def main():
     args.valid_parquet = args.valid_parquet or [str(ROOT / "datasets" / "valid.parquet")]
     train = ParquetGroups(args.train_parquet)
     valid = ParquetGroups(args.valid_parquet)
+    n_base = len(train)
+    if args.extra_train_seqs and not args.resume:
+        ze = np.load(args.extra_train_seqs)
+        uw = args.unscored_weight if args.unscored_weight is not None else 0.0
+        train.extend(args.extra_train_parquet, ze["g"], ze["seq"], (args.extra_weight - uw) / (1.0 - uw))
+        print(f"Secuencias extra: {len(train) - n_base} de {args.extra_train_parquet} (índices {n_base} en adelante, "
+              f"peso por fila {args.extra_weight})", flush=True)
     if not valid.has_scored:
         raise ValueError("valid necesita is_scored para la métrica oficial")
     train_ids = list(range(len(train))) if args.train_groups == "all" else select_groups(len(train), int(args.train_groups), args.seed)
@@ -800,7 +956,7 @@ def main():
     if args.unscored_weight is not None and not train.has_scored:
         raise ValueError("--unscored-weight necesita is_scored en el parquet de entrenamiento")
     if args.cv_folds and not args.resume:
-        if len(train) != len(valid):
+        if n_base != len(valid):
             raise ValueError("--cv-folds necesita el mismo parquet en train y valid")
         pliegues = np.array_split(np.random.default_rng(args.cv_seed).permutation(len(valid)), args.cv_folds)
         fuera = set(pliegues[args.cv_fold].tolist()) if args.cv_fold >= 0 else set()
@@ -827,7 +983,7 @@ def main():
         cfg = ck["config"]
         pipe = FeaturePipeline(cfg["top_k"], cfg["sentinel_flags"], Path(cfg["ranking"]), cfg.get("cross_features", False),
                                cfg.get("ema_features", False), cfg.get("ema_plus", False),
-                               cfg.get("adapt_span", 0))
+                               cfg.get("adapt_span", 0), cfg.get("fusion_features", False))
         pipe.mean, pipe.std = ck["pipeline"]["mean"], ck["pipeline"]["std"]
         if args.resume_epochs is not None:
             cfg["epochs"] = args.resume_epochs
@@ -845,7 +1001,7 @@ def main():
         cfg = {**vars(args), "device": str(device), "batch": batch, "chunk": chunk,
                "train_ids": train_ids, "valid_ids": valid_ids, "n_train": len(train_ids)}
         pipe = FeaturePipeline(args.top_k, args.sentinel_flags, Path(args.ranking), args.cross_features,
-                               args.ema_features, args.ema_plus, args.adapt_span)
+                               args.ema_features, args.ema_plus, args.adapt_span, args.fusion_features)
         t0 = time.time()
         if len(train_ids) > 200:
             norm_ids = [train_ids[i] for i in select_groups(len(train_ids), 200, args.seed + 7)]
@@ -861,6 +1017,11 @@ def main():
     if cfg.get("arch", "rnn") == "tcn":
         model = TCNModel(len(pipe.names), cfg["tcn_channels"], cfg["tcn_layers"], cfg["tcn_kernel"],
                          cfg.get("dropout", 0.0), n_aux).to(device)
+    elif cfg.get("arch", "rnn") == "fusion":
+        model = FusionModel(len(pipe.names), cfg.get("fusion_emb", 64), cfg["hidden"], cfg.get("fusion_mid", 64), n_aux).to(device)
+    elif cfg.get("arch", "rnn") == "lookahead":
+        model = LookAheadModel(len(pipe.names), cfg["hidden"], cfg["layers"], cfg.get("la_canales", 64),
+                               tuple(cfg.get("la_dil", (1, 2, 4, 8, 9))), n_aux).to(device)
     else:
         model = RNNModel(len(pipe.names), cfg["hidden"], cfg["layers"], cfg["cell"], cfg.get("dropout", 0.0),
                          cfg.get("slow_hidden", 0), cfg.get("slow_every", 32), n_aux).to(device)
@@ -905,6 +1066,9 @@ def main():
         print(f"TCN {cfg['tcn_channels']} canales x{cfg['tcn_layers']} capas  campo receptivo={model.receptive} filas  "
               f"entradas={len(pipe.names)}  params={n_params:,}  ~{macs:,} operaciones por fila "
               f"(la LSTM 128x2 usa 254.208)", flush=True)
+    elif cfg.get("arch", "rnn") == "fusion":
+        print(f"FUSION emb={cfg.get('fusion_emb', 64)} GRU h={cfg['hidden']} mid={cfg.get('fusion_mid', 64)}  "
+              f"entradas={len(pipe.names)}  params={n_params:,}", flush=True)
     else:
         print(f"{cfg['cell'].upper()} h={cfg['hidden']} x{cfg['layers']}  entradas={len(pipe.names)}  params={n_params:,}", flush=True)
 
@@ -930,7 +1094,7 @@ def main():
             sd["head.weight"], sd["head.bias"] = sd["head.weight"][:2], sd["head.bias"][:2]
         torch.save({"state_dict": {k: v.detach().cpu() for k, v in sd.items()},
                     "config": {k: cfg[k] for k in ("cell", "hidden", "layers")} |
-                              {k: cfg.get(k) for k in ("arch", "tcn_channels", "tcn_layers", "tcn_kernel")} |
+                              {k: cfg.get(k) for k in ("arch", "tcn_channels", "tcn_layers", "tcn_kernel", "la_canales", "la_dil")} |
                               {k: cfg.get(k, 0 if k == "slow_hidden" else 32) for k in ("slow_hidden", "slow_every")},
                     "pipeline": pipe.state(), "n_inputs": len(pipe.names), **(extra or {})}, path)
 
@@ -1022,7 +1186,10 @@ def main():
                                              (soft_full[..., 0] - soft_full[..., 1]) * 0.5], -1)
             for s in range(0, SEQUENCE_LENGTH, chunk):
                 e = min(s + chunk, SEQUENCE_LENGTH)
-                pred, state = model(x[:, s:e], state, with_aux=aux_full is not None)
+                if cfg.get("arch", "rnn") == "lookahead":
+                    pred, state = model(x[:, s:e], state, with_aux=aux_full is not None, futuro=x[:, e:e + model.k])
+                else:
+                    pred, state = model(x[:, s:e], state, with_aux=aux_full is not None)
                 if aux_full is not None:
                     pred, pred_aux = pred[..., :2], pred[..., 2:]
                 if soft_cache is not None:
@@ -1040,7 +1207,7 @@ def main():
                                                 (soft[..., 0] - soft[..., 1]) * 0.5], -1)
                 if e > WARMUP:
                     if cfg["loss"] == "wmse":
-                        loss = loss_wmse(pred, y[:, s:e], m[:, s:e], cfg.get("weight_power", 1.0), cfg.get("weight_floor", 0.0))
+                        loss = cfg.get("real_weight", 1.0) * loss_wmse(pred, y[:, s:e], m[:, s:e], cfg.get("weight_power", 1.0), cfg.get("weight_floor", 0.0))
                     elif cfg["loss"] == "seqwp":
                         loss, seq_stats = loss_seqwp(pred, y[:, s:e], m[:, s:e], seq_stats, cfg.get("seqwp_decay", 0.98))
                         if cfg.get("wmse_anchor", 0.0) > 0:

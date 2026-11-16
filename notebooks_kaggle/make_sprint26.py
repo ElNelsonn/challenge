@@ -16,7 +16,10 @@ RECETA = (f"--dropout 0.1 --lr {LR} --lr-decay 1.0 --weight-decay 1e-4 --clip 1.
           f"--distill-weight {DW} --unscored-weight 0.1 --train-groups all --workers 4 --layers 2 --hidden 128")
 CELDA = {"LR_swa": "lstm", "mask_swa": "lstm", "LA_best": "lstm", "long_best": "lstm", "E_swa": "gru", "X_best": "gru",
          "Z_swa": "gru", "Y_best": "gru"}
-MIEMBROS_B = sys.argv[5].split(",") if len(sys.argv) > 5 else None
+MIEMBROS_B = sys.argv[5].split(",") if len(sys.argv) > 5 and sys.argv[5] != "-" else None
+SEMILLAS = [int(s) for s in sys.argv[6].split(",")] if len(sys.argv) > 6 else [1, 2]
+EXTRA = sys.argv[7] if len(sys.argv) > 7 else None
+EXTRA_ARGS = " --extra-train-parquet $TRAIN --extra-train-seqs $EXTRA" if EXTRA else ""
 
 
 def md(t):
@@ -49,6 +52,8 @@ BUSCADOR = (
     "\n"
     "VALID = buscar('valid.parquet')\n"
     f"SOFT = buscar('{SOFT}')\n"
+    + ("TRAIN = ' '.join(buscar(n) for n in ('train_part1.parquet', 'train_part2.parquet'))\n"
+       f"EXTRA = buscar('{EXTRA}')\n" if EXTRA else "") +
     "for m in " + repr(list(CELDA)) + ":\n"
     "    globals()['INIT_' + m] = buscar(f'ftv_init_{m}.pt')\n"
     "os.makedirs('/kaggle/working/results', exist_ok=True)\n"
@@ -68,9 +73,10 @@ def humo(m):
     return (f"!python train_official_gpu_v1.py --train-parquet $VALID --valid-parquet $VALID "
             f"--train-groups 24 --valid-groups 60 --cv-folds 5 --cv-fold 0 --output-dir /kaggle/tmp/smoke "
             f"--epochs 1 --cell {CELDA[m]} --hidden 128 --layers 2 --lr 2e-4 --seed 1 --model-seed 1 "
-            f"--init-from $INIT_{m} --soft-npz $SOFT --distill-weight 4 --unscored-weight 0.1 --run-name smoke\n"
+            f"--init-from $INIT_{m} --soft-npz $SOFT --distill-weight 4 --unscored-weight 0.1{EXTRA_ARGS} --run-name smoke\n"
             "import json\n"
             "m = json.load(open('/kaggle/tmp/smoke/smoke/metrics.json'))\n"
+            + ("assert max(m['config']['train_ids']) >= 1873, 'no entraron secuencias extra'\n" if EXTRA else "") +
             "assert m['config']['init_from'], 'no inicializó'\n"
             "assert m['config']['soft_npz'], 'sin etiquetas blandas'\n"
             "assert m['config']['unscored_weight'] == 0.1, 'sin peso de filas puntuadas'\n"
@@ -82,7 +88,7 @@ def humo(m):
 def correr(nombre, m, extra, seed):
     return (f"!python train_official_gpu_v1.py --train-parquet $VALID --valid-parquet $VALID "
             f"--output-dir /kaggle/working/results --init-from $INIT_{m} --soft-npz $SOFT --cell {CELDA[m]} "
-            f"{RECETA} {extra} --seed {seed} --model-seed {seed} --run-name {nombre} || echo 'FALLO {nombre}'\n"
+            f"{RECETA} {extra}{EXTRA_ARGS} --seed {seed} --model-seed {seed} --run-name {nombre} || echo 'FALLO {nombre}'\n"
             f"!rm -f /kaggle/working/results/{nombre}/checkpoint.pt\n")
 
 
@@ -103,7 +109,11 @@ INTRO = ("**Inputs:** `Connectome valid` y `Connectome ftv` (etiquetas blandas +
          "Ajuste fino de los miembros del ensamble **con las secuencias de valid**, pesando 1 las filas que puntúa "
          "la métrica y 0,1 el resto, y con target 0,2 × real + 0,8 × etiqueta blanda (`" + SOFT + "`, de modelos que "
          "nunca vieron esa secuencia). 6 épocas, lr 2e-4, weight decay 1e-4. Un competidor documentó +0.007 en el leaderboard con esta "
-         "receta; train y valid son regímenes de mercado distintos y el test se parece a valid.\n\n")
+         "receta; train y valid son regímenes de mercado distintos y el test se parece a valid.\n\n"
+         + (f"**Variante:** además de valid entran las 600 secuencias de train de `{EXTRA}` (sprint 38: las que un "
+            "clasificador train/valid más confunde con valid; sprint 39: 600 al azar, el control), con etiqueta "
+            "blanda de S10 y peso 0,185 por fila. Si gana en la prueba limpia, se aplica a los 6 miembros.\n\n"
+            if EXTRA else ""))
 
 LR_FOLDS = [(f"{PRE}LR_f{k}", "LR_swa", f"--cv-folds 5 --cv-fold {k} --valid-groups all --save-valid-preds", 2600 + k)
             for k in range(5)]
@@ -114,7 +124,7 @@ RESTO = ([(f"{PRE}{m}_all_s1", m, "--cv-folds 5 --cv-fold -1 --valid-groups 60",
             for m in ("mask_swa", "LA_best", "long_best")])
 if MIEMBROS_B:
     RESTO = [(f"{PRE}{m}_all_s{k}", m, "--cv-folds 5 --cv-fold -1 --valid-groups 60", 2620 + k)
-             for k in (1, 2) for m in MIEMBROS_B]
+             for k in SEMILLAS for m in MIEMBROS_B]
 
 NBS = {
     f"connectome_sprint{TAG}a_ftv_lr": (

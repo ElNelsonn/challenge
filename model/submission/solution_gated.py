@@ -35,6 +35,7 @@ LUT_VALS = np.ascontiguousarray(_W["lut_vals"], dtype=np.float32)
 LUT_CLASS = np.ascontiguousarray(_W["lut_class"], dtype=np.int64)
 LUT_OFF = np.ascontiguousarray(_W["lut_off"], dtype=np.int64)
 DECIDE = int(_W["decide_row"])
+MIN_VOTES = 3
 
 FAST = {"reassoc", "contract", "arcp", "afn", "nsz"}
 TANH_CLAMP = 7.90531110763549805
@@ -204,11 +205,11 @@ class PredictionModel:
             self._reset()
         x = np.asarray(data_point.state, dtype=np.float32)
         if self.cls < 0:
-            if self.step >= DECIDE or data_point.need_prediction:
+            vote(x, self.votes)
+            claro = self.votes.max() >= MIN_VOTES and (self.votes > 0).sum() == 1
+            if claro or self.step >= DECIDE or data_point.need_prediction:
                 self.cls = decide(self.votes)
                 self.wts = CLASS_W[self.cls]
-            else:
-                vote(x, self.votes)
         step_row(x, self.h0, self.h1, self.c0, self.c1, self.z, self.gi, self.gh, self.out, self.wts)
         self.step += 1
         if not data_point.need_prediction:

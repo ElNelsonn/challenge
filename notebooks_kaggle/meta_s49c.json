@@ -1,0 +1,23 @@
+{
+ "id": "joaqfio/connectome-s49c-miembro",
+ "title": "connectome-s49c-miembro",
+ "code_file": "connectome_sprint49c_miembro.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": true,
+ "enable_tpu": false,
+ "enable_internet": true,
+ "keywords": [],
+ "dataset_sources": [
+  "joaquinfiorina/connectome-train-part1",
+  "joaquinfiorina/connectome-train-part2",
+  "joaquinfiorina/connectome-valid",
+  "joaqfio/connectome-fusion",
+  "joaqfio/connectome-soft-s10"
+ ],
+ "kernel_sources": [],
+ "competition_sources": [],
+ "model_sources": [],
+ "machine_shape": "NvidiaTeslaT4"
+}

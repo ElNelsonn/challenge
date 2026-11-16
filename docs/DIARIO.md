@@ -1,5 +1,142 @@
 # Diario del proyecto — Alpha Connectome (WunderNN)
 
+## 2026-11-13 — S21a: 0.65958, récord
+
+- **S21b en el LB: 0.65947** en 51m16s (+0.00118 sobre S20). Es la mayor suba desde S13: el maestro que mira adelante sí se traslada al LB.
+- **S21a: 0.65958, récord** (51m21s): S20 con solo las 3 GRU cambiadas por las nuevas. **S21c: 0.65947** (54m01s), igual que S21b.
+- Lectura: todo el salto viene de las GRU, que eran las débiles. Las LSTM y la fusión nuevas no suman sobre las viejas: las viejas, entrenadas con otras etiquetas, dan más diversidad.
+- Faltan 0.0004 para 0.66 y 0.0049 para el competidor (0.6645).
+- Lancé el **sprint 51** (4 notebooks, dos por cuenta) buscando GRU mejores o distintas: maestro de 25 filas entrenado 6 épocas (51A), GRU con maestro de 50 filas (51B), 75 % de lector en las etiquetas (51C), y especialistas para la LSTM y la fusión de 50 filas que ya teníamos (51D). Cada GRU trae prueba limpia contra el 0.6879 del 49D y queda lista para S22.
+- Armé **S21e** para los envíos que quedan hoy: las 4 GRU nuevas + LR + long viejas (la composición de S16).
+- **Sprint 51 terminado, sin fallas.** Ninguna receta nueva le gana a la GRU del 49D (0.6879 en la prueba limpia): maestro con 6 épocas 0.6868 (el maestro no mejora: 0.7664), 75 % de lector 0.6868. **La GRU con maestro de 50 filas empata (0.6876)** y aprendió de etiquetas distintas: es candidata para darle diversidad al ensamble. Los especialistas de la LSTM y la fusión de 50 filas quedaron hechos.
+- Para elegir S22 sin gastar envíos armé una medición limpia de ensambles: cada modelo de pliegue predice solo las secuencias que no vio y se combinan las predicciones (11 miembros, en Kaggle con GPU; en la laptop eran 13 min por miembro).
+- **Resultado:** lo parecido a S21a da 0.68792 y la mejor combinación de 6 da **0.68840** (+0.0005): GRU 49D, otra GRU de 25 filas, **GRU de 50 filas**, la LR vieja, la LSTM 49A y **la fusión de 50 filas**. Lo de 50 filas suma porque aprendió de etiquetas distintas. La fusión y la LSTM viejas ya no entran.
+- Armé **S22a** (esos 6, con la GRU 5002 en lugar de la 51A) y **S22b** (la mejor de 5: sin la segunda GRU de 25 filas, que además tarda menos).
+
+## 2026-11-12 (tarde) — S21 lista en tres versiones
+
+- La notebook se durmió de 01:49 a 11:23 y el vigilante quedó frenado, pero en Kaggle todo siguió: **49B, 50A, 50B y 50C terminaron sin fallas.**
+- **49B, fusión con maestro de 50 filas: 0.6867 ajustada** (la fusión anterior 0.6855). Los alumnos nuevos quedaron parejos: GRU 0.6853 / 0.6861 / 0.6853, LSTM 0.6848 y fusión 0.6849 sin ajustar.
+- Armé tres zips, los tres con el instrumento bien detectado en 8 de 8 secuencias:
+  - **S21b:** los 6 miembros nuevos (3 GRU, 2 LSTM, fusión). Es la apuesta principal.
+  - **S21a:** S20 con solo las 3 GRU cambiadas, para saber cuánto suman ellas solas.
+  - **S21c:** 4 GRU y 2 LSTM nuevas, sin fusión.
+- Orden sugerido para subir: S21b primero; después S21c o S21a según lo que dé.
+
+## 2026-11-12 (madrugada) — Por fin una mejora de verdad: la GRU con maestro que mira adelante
+
+- **49D terminó en 2,6 h en vez de 12.** Copiar los datos al disco local era la mitad del problema: el maestro tarda ~2 min por época.
+- **El alumno GRU entrenado con etiquetas del maestro de 25 filas da 0.6856 sin ajustar** (la GRU E daba 0.6790 y la LR 0.6834). **Ajustado en valid, 0.6879 en la prueba limpia de 5 pliegues, contra 0.6863 de la LR.** Es el mejor miembro que tuvimos y es limpio: el maestro solo vio train y el ajuste usa las etiquetas de S10, igual que siempre.
+- Lancé el **50A** en joaqfio: especialistas por instrumento de esa GRU y dos GRU más con otras semillas, para reemplazar a E, X y Z en S21. Cuando terminen los otros tres del 49 lanzo lo mismo para las LSTM y la fusión.
+- **49A, la LSTM con el mismo maestro: 0.6874 ajustada** (la LSTM anterior 0.6861). También gana. Lancé el **50B** en la cuenta principal con sus especialistas y otra LSTM nueva.
+- **49C, LSTM con maestro de 50 filas: 0.6870**, empate con la de 25. Sigo con 25 filas, que es más barato y en el sprint 29 también había ganado.
+- La primera versión del 50A y del 50B murió en la prueba de humo: me faltó crear la carpeta donde escribe. Corregido y relanzados. Lancé también el **50C** (fusión nueva y una cuarta GRU) en joaqfio.
+- Windows borró solos los modelos viejos de la carpeta temporal (los de S20). Los volví a bajar de Kaggle; la primera descarga quedó incompleta por cortes de conexión y tuve que repetirla.
+
+## 2026-11-11 — Seis días perdidos; cuatro notebooks esta noche
+
+- **Del 5 al 11 no corrió nada.** Los reintentos automáticos del sprint 48 murieron cuando se cerró la sesión, y no quedó nadie para lanzarlo cuando volvió la cuota. Fue un error mío: dependía de un proceso en la laptop.
+- Lancé el **sprint 49: 4 notebooks a la vez**, dos por cuenta. Cada uno arma un miembro completo para la entrega: maestro con lector del futuro, etiquetas, alumno de 3 épocas, ajuste con prueba limpia y con todo valid. También deja etiquetas fuera de pliegue para probar mañana en el ajuste.
+- Combinaciones: 25 filas + LSTM, 50 filas + fusión, 50 filas + LSTM y 25 filas + GRU. Las dos LSTM comparan 25 contra 50 filas.
+- Quedan 4 días para el cierre. Si algún alumno gana, mañana armo S21 cambiando miembros de S20.
+
+## 2026-11-04 — S20 casi no suma; probamos los padres del competidor
+
+- **S20 en el LB: 0.65829** (+0.00007 sobre S19), en 49m47s. Récord, pero muy lejos de lo que esperaba. La fusión no
+  repite su +0.0017: el competidor la sumaba a una sola estructura y nosotros ya mezclábamos GRU y LSTM.
+- Releí sus notas contra lo nuestro. Casi toda la distancia (0.0063) está en cómo arma las etiquetas y los padres:
+  **3 épocas, solo etiquetas de maestros, maestros que miran adelante también en el entrenamiento base**. Nosotros
+  entrenamos 10 épocas con 50 % de target real, y a los maestros que miran adelante los probamos solo en el ajuste.
+- La fusión tardaba 11 h porque armaba sus 560 entradas en el hilo principal. Con numba es **9× más rápida** y da lo
+  mismo.
+- Lancé el **sprint 47 en joaqfio**: padres cortos con etiquetas puras, fusión y LSTM, con prueba limpia. Si gana, le
+  sigue un maestro de verdad con lectura del futuro en convolución.
+- **47B, padre corto LSTM: 0.6856 ajustado contra 0.6863 de la LR.** No gana. Lo interesante: con solo 3 épocas queda
+  a 0.0008, así que la duración no era el problema. Lo que nos falta del competidor son los maestros que miran adelante.
+- Escribí ese maestro (`LookAheadModel`: GRU causal + lector convolucional de las filas futuras). Las pruebas confirman
+  que ve exactamente 25 o 50 filas futuras y que da lo mismo por trozos que entero.
+- Casi todo el tiempo de Kaggle se va en leer el disco: ~35 s por lote, cuando la GPU necesita unos pocos segundos.
+  Lancé un notebook sin GPU (`joaqfio/connectome-disco`) para medir si copiar train al disco local lo arregla.
+- **Sí lo arregla, al menos en la lectura:** copiar los 29 GB tarda 3,3 min y leer queda 3 a 5 veces más rápido. Nunca
+  lo habíamos probado. Falta medir cuánto baja el tiempo por época con GPU.
+- **Sprint 48 listo pero frenado:** las dos cuentas llegaron a las 30 h semanales, y Kaggle lo confirmó al querer lanzar.
+  Dejé reintentos automáticos para que salga apenas vuelva la cuota.
+- **El maestro con lector del futuro aprende:** en la laptop, con 400 secuencias y 2 épocas, llega a **0.7791** en 64
+  secuencias de valid (0.7436 tras la primera época). Sin futuro no pasamos de 0.69 ni con todo el entrenamiento.
+- Esa corrida se cayó en la época 2 con `ReadRangeCache did not find matching cache entry` de pyarrow: varios hilos
+  leían el mismo `ParquetFile`. Ahora cada hilo abre el suyo (`del_hilo`). 600 lecturas con 8 hilos, sin errores, y en
+  las 40 comparadas los datos son iguales a leer con un solo hilo. En Kaggle no había pasado, pero el disco más rápido
+  podía provocarlo. Los notebooks del 48 ya lo llevan.
+- Empecé en la laptop una prueba chica de alumnos con las etiquetas nuevas, pero **la corté porque consumía demasiado**
+  de la notebook. Solo llegó a terminar el alumno con etiquetas causales (0.6453), así que no hay comparación. No
+  largar nada pesado en la notebook sin preguntar.
+- **47A, padre corto fusión: base 0.6821, igual que el 44A**, con 3 épocas en lugar de 10. Ajustada, 0.6855 de promedio
+  de pliegues contra 0.6851 del 45B, dentro del ruido. No gana, pero confirma que 3 épocas alcanzan.
+
+## 2026-11-03 — La red fusión entrenada: la mejor de costo GRU
+
+- **44A: 0.6821 en valid (SWA)**, sin ajustar. Es la mejor red que cuesta lo mismo que una GRU (la E da 0.6805) y
+  queda cerca de la LR (0.6834). Tardó 11,2 h, a 45 min del corte de Kaggle.
+- **44B murió:** le tocó una máquina lenta (665 min solo para las etiquetas blandas) y Kaggle la cortó a las 12 h.
+  Queda una sola semilla. Con esto la cuenta principal se quedó casi sin horas de GPU esta semana.
+- Subí la SWA del 44A como `joaqfio/connectome-fusion` y lancé el **sprint 45 en joaqfio** (14:40): la fusión
+  ajustada en valid con la receta de S13, 2 semillas + especialistas del instrumento 3 (45A) y la prueba limpia de
+  5 pliegues (45B). Si la fusión ajustada suma reemplazando a Y, siguen el 46 (especialistas 0-2) y S20.
+- **La fusión suma (antes del ajuste):** en la laptop, agregada a E X Z LR long da +0.0005, y en lugar de una GRU
+  +0.0008, igual en las dos mitades de valid. Se parece menos al ensamble que cualquier GRU (0.9872 contra
+  0.9905–0.9914). Es la primera red de costo GRU que suma tanto como una LSTM.
+- **S19 en el LB: 0.65822, récord** (+0.00006 sobre S18), en **51m57s** (S18: 58m22s). Las sopas de 4 semillas casi
+  no suman, pero el kernel nuevo confirma la sospecha: el ruteo dentro de un solo kernel costaba 6 min. S19 reemplaza
+  a S18 como entrega segura para elegir al final: es mejor y tiene 8 min de margen.
+- Lancé el **sprint 46** (especialistas de la fusión) sin esperar al 45B, porque cuesta ~1,5 h. `build_s20.py` arma
+  S20 con la fusión en lugar de Y.
+- **45B, prueba limpia: 0.6845**, +0.0024 sobre su base, pero **el ajuste se come la mitad de lo que la hacía
+  distinta**: mezclada con la LR daba +0.0016 antes y +0.0007 después (mejora en los 4 instrumentos). Sigue sumando
+  más que una GRU (+0.0001 a +0.0002 con la LR ajustada), aunque esas GRU no están ajustadas: el reemplazo de Y no se
+  puede medir directo. Estimo +0.0003 en valid.
+- **S20 listo** (`ens6_spec46_S20.zip`): detección 8/8, paridad 3.47e-2 e igual o algo más rápida que S19. Vale una
+  entrega: es la única forma de medir el reemplazo, y el LB ya premió antes la mezcla de arquitecturas más que valid.
+
+## 2026-11-01 — Más datos no; especialistas por instrumento, sí a probar
+
+- La laptop se durmió y el 38A se lanzó dos veces (un push con timeout sí había llegado). El 39A esperó un lugar
+  y salió a las 13:25. Ahora `push_retry.py` revisa el estado antes de reintentar.
+- **38A: 0.6868, 39A: 0.6864, contra 0.6869.** Sumar 600 secuencias de train al ajuste (las más parecidas a valid
+  o al azar) no aporta. El competidor midió lo mismo en el LB (+0.00003). Descartado.
+- Releí las notas del competidor (0.6645). De lo que él midió en el LB, lo que no tenemos bien probado son los
+  **especialistas por instrumento** (+0.00067). Con lo nuestro del sprint 25 (sin destilar) la cuenta pesada da
+  ~+0.0007. El kernel con ruteo ya estaba: detecta el instrumento con una tabla armada solo con train y acierta
+  1.872 de 1.873 secuencias de valid (la otra va a los modelos generales), y tarda lo mismo que S17.
+- Lancé el **sprint 40** en la cuenta principal: especialistas con la receta de S13, 5 pliegues por instrumento.
+  40A parte de la LR base, 40B de la LR ya ajustada en valid. Si ganan en los instrumentos 0 y 1, se ajustan los 6
+  miembros por instrumento y sale S18.
+- **Sprint 40, prueba limpia: los especialistas sirven.** Desde la LR base (40A): +0.0006, casi todo por el
+  instrumento 3 (0.4339 → 0.4358). Desde la LR ya ajustada (40B): gana en 0, 1 y 2 (+0.0004) y pierde en el 3.
+  **Tomando lo mejor de cada uno: 0.6872 contra 0.6863, +0.0009 (desvío 0.0003).** Lancé el sprint 41 con esa
+  combinación para los 6 miembros de la entrega (48 corridas, ~4–5 h). Con eso armo S18.
+- El kernel con ruteo corría las 30 redes hasta la fila 99 y costaba +2,7 %. Ahora decide apenas hay 3 votos
+  claros (fila 4 en promedio; 0 errores con tabla de train) y tarda lo mismo que S17.
+- **S18 listo** (`ens6_spec41_S18.zip`, 2 de noviembre de madrugada): los 6 miembros de S17 especializados por
+  instrumento, sopas de 2 semillas, 30 redes. Detección 8/8, paridad 1.59e-2, mismo tiempo que S17.
+- **S18 en el LB: 0.65816, récord** (+0.00047 sobre S17). Pero tardó **58m22s** contra 52m32s de S17, a 1m38s del
+  límite. Las reglas dicen que al final se eligen entregas ya puntuadas para recalificarlas con el test privado: hay
+  que elegir también S17 como respaldo y bajar el tiempo de las próximas.
+- Sprint 42 corriendo: cuánto target real quiere cada instrumento (el 3 con 10 % y 1 %, el 0-2 con 50 %).
+- **El tiempo de S18 no es ruido:** con 5 redes el servidor varió 46–48 min y con 6, 52,5–55. Sospecha: el kernel
+  con ruteo pierde especialización del compilador. Armé `solution_switch.py`: 5 copias del kernel de S17 y se
+  usa una por secuencia. Mismas predicciones (bit a bit) → **S18s** para subir y ver el tiempo.
+- Lancé el **sprint 43**: semillas 3 y 4 de los especialistas, para sopas de 4.
+- **La red fusión**, lo que más le dio al competidor que no teníamos (+0.0017): entrada de 560 columnas (crudas,
+  diferencias y 3 promedios móviles) → 64 → GRU de una capa → salida que mira el estado y la entrada proyectada.
+  Programada en el entrenador y en el kernel (`solution_mixto.py`), con paridad 1.09e-2. Cuesta lo mismo que una GRU:
+  entra reemplazando a Y. Sprint 44 (2 semillas, todo train) en cola detrás del 43.
+- **S19 listo** (`ens6_spec43_S19.zip`): especialistas con sopas de 4 semillas sobre el kernel nuevo. La métrica del
+  zip coincide con PyTorch (0.72509 contra 0.72505). La red fusión (44A y 44B) corre en Kaggle desde las 16.
+- **Sprint 42 (mezcla de target por instrumento): nada.** El instrumento 3 con menos target real pierde (10 %:
+  −0.0008; 1 %: −0.0010) y el 0-2 con más también (50 %: −0.0004). El 20 % de la receta es el óptimo.
+- **S17 en el LB: 0.65769, récord** (+0.0001 sobre S16), en 52m32s (S16: 54m47s con la misma arquitectura: el
+  servidor varía ±2 min). Las sopas de 2 semillas suman lo previsto, poco.
+
 ## 2026-10-27 (madrugada) — Lo que nos faltaba: valid se parece al test, train no
 
 - Busqué qué publicaron otros competidores. Uno con LB 0.6645 dejó sus notas: **train y valid son regímenes de
@@ -47,6 +184,43 @@
   maestro la25 en vez de las de S10. Es la comparación limpia en el LB: mismos modelos, cambia la etiqueta.
 - **Sprint 32B:** ajuste con la receta de S13 de las GRU Z e Y, para probar un ensamble ajustado con 3 GRU
   (S7 tenía 3 GRU; S11 mostró que la diversidad llega al test).
+- **S15 y S16 listos:** la receta de S13 con 3 GRU + 2 LSTM (~46 min) y con 4 GRU + 2 LSTM (6 modelos, ~52–53 min).
+  No se pueden medir en valid (los modelos vieron todo valid); decide el LB.
+- **S14 en el LB: 0.65307**, 0.0043 peor que S13. Las etiquetas de maestros entrenados con valid hacen daño: enseñan
+  el futuro de esas mismas secuencias. Descartadas.
+- Probé una etiqueta con los 8 modelos de S7 y S10 (4 GRU + 4 LSTM): 0.6859 y correlación 0.998 con S10. No cambia nada.
+- **Sprint 33:** maestros de 25 y 10 filas entrenados SOLO con 2000 secuencias de train (como hizo el competidor),
+  partiendo de la LR. Sus etiquetas sobre valid son honestas y la prueba de 5 pliegues vuelve a ser confiable.
+- **S16 en el LB: 0.65759, récord** (+0.0003 sobre S13): 4 GRU + 2 LSTM ajustados en valid. Tardó 54m47s: al límite.
+- **Maestro latr10 (solo train): 0.7198 en valid**, sin haberlo visto (el de valid daba 0.711 fuera de pliegue).
+  Sprint 34A: prueba limpia de la LR ajustada con sus etiquetas.
+- **Maestro latr25 (solo train): 0.7553 en valid** (instrumento 3: 0.576), sin haberlo visto. Sprint 35A: su prueba limpia.
+
+## 2026-10-29 — Los maestros que miran adelante quedan descartados; la prueba limpia predice el LB
+
+- La laptop se suspendió a la noche y el proceso que encadenaba Kaggle quedó congelado de 1:38 a 11:43. Ahora pido
+  que la PC no se duerma mientras haya trabajo.
+- **Pruebas limpias (34A / 35A):** la LR ajustada con etiquetas de maestros entrenados solo con train da 0.6840 y
+  0.6820, contra 0.6863 con etiquetas de S10. Empeoran. El −0.0042 de latr25 coincide con S14 en el LB (−0.0043).
+  Conclusión: **las etiquetas de S10 son las mejores que tenemos y la prueba limpia es confiable para decidir**.
+- **Sprint 36A (50 % de target real): 0.6842**, −0.0021. Sube un poco los instrumentos 0 y 1 y hunde el 3
+  (0.434 → 0.426): otra vez, lo que se acerca al target crudo empeora el instrumento 3. Queda 20 %.
+- **Mezcla de pesos ajustado/original (WiSE, en la laptop, sin GPU):** 50 % 0.6855, 75 % 0.6860, 100 % 0.6863,
+  125 % 0.6862. Lo mejor es no mezclar.
+- Las curvas por pliegue muestran que el ajuste gana todo en la primera época y después queda plano: **la receta
+  está saturada**. Lo que queda por mejorar no es la receta sino qué modelos entran.
+- **Sprint 37B:** segunda semilla de E y X (eran las únicas de S16 con una sola). Tardó 2,25 h por una máquina que
+  leía lento el disco en la primera época; la cuenta principal queda con ~1 h de GPU hasta el sábado.
+- **S17 listo** (`ens6_ftv37_E2_X2_Z_Y_LR_long.zip`): S16 con E y X promediadas con su segunda semilla. Misma
+  arquitectura y mismo tiempo que S16 (~55 min). Mejora esperada chica. Joaquín lo subió.
+- Acelerar el kernel para meter un 7.º modelo: no hay margen barato (ya usa tanh racional e int8; el tope es
+  convertir int8 a float, y numba promueve los enteros a 64 bits). Descartado.
+- **Clasificador train/valid: AUC 0.995.** Lo que separa los regímenes es la actividad de volumen. Hay unas 600
+  secuencias de train que se parecen algo a valid. El entrenador ahora acepta `--extra-train-seqs` para sumarlas al
+  ajuste fino (verifica cada `seq_ix`). Listos para el sábado: **38A** (valid + esas 600) y **39A** (control con 600
+  al azar), los dos con la prueba limpia de 5 pliegues.
+- Errores míos: un `git status` se coló en un comando (no debía tocar git) y regeneré sin querer los notebooks del
+  sprint 26 (quedan con el entrenador nuevo; funcionan igual).
 
 ## 2026-10-26 (noche) — Los especialistas por instrumento no sirven, y las filas puntuadas tampoco
 
